@@ -23,6 +23,11 @@ import {
   TargetType,
   UploadStatus,
 } from '@prisma/client';
+import {
+  avisarSiNoHayAlmacenamiento,
+  sembrarDocumento,
+  sembrarImagenRender,
+} from './seed-storage';
 
 loadEnv({ path: path.resolve(__dirname, '../../../.env') });
 
@@ -224,6 +229,16 @@ async function main(): Promise<void> {
   let ultimaVersionId = '';
   for (const item of versiones) {
     const id = `55555555-5555-4555-8555-55555555555${item.v}`;
+    const storageKey = `projects/${proyectos[0].id}/renders/${renderId}/v${item.v}/lobby.jpg`;
+
+    // Se genera y sube la imagen ANTES de escribir la fila, para poder
+    // guardar el tamano real del objeto en lugar de uno inventado.
+    const subida = await sembrarImagenRender({
+      storageKey,
+      titulo: 'Lobby principal',
+      version: item.v,
+    });
+
     await prisma.renderVersion.upsert({
       where: { id },
       update: {},
@@ -231,16 +246,16 @@ async function main(): Promise<void> {
         id,
         renderId,
         version: item.v,
-        storageKey: `projects/${proyectos[0].id}/renders/${renderId}/v${item.v}/lobby.jpg`,
+        storageKey,
         originalName: `lobby_v${item.v}.jpg`,
         mimeType: 'image/jpeg',
-        sizeBytes: BigInt(2_400_000 + item.v * 100_000),
+        sizeBytes: BigInt(subida?.sizeBytes ?? 2_400_000),
+        thumbnailKey: subida?.thumbnailKey ?? null,
         width: 1920,
         height: 1080,
         status: item.status,
         notes: item.notes,
         uploadedById: tecnico.id,
-        // COMPLETED porque son datos de ejemplo: no hay objeto real en MinIO.
         uploadStatus: UploadStatus.COMPLETED,
       },
     });
@@ -337,7 +352,7 @@ async function main(): Promise<void> {
     { id: '99999999-9999-4999-8999-999999999993', name: 'Certificacion CE - Linea LX', category: FileCategory.CERTIFICACION },
   ];
 
-  for (const doc of documentos) {
+  for (const [indice, doc] of documentos.entries()) {
     await prisma.projectFile.upsert({
       where: { id: doc.id },
       update: {},
@@ -349,9 +364,44 @@ async function main(): Promise<void> {
         createdById: tecnico.id,
       },
     });
+
+    // Cada documento necesita al menos una version con su PDF: sin ella el
+    // portal lo muestra como "sin archivo" y no se puede descargar.
+    const versionId = `aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa${indice + 1}`;
+    const nombreArchivo = `${doc.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')}.pdf`;
+    const storageKey = `projects/${proyectos[0].id}/files/${doc.id}/v1/${nombreArchivo}`;
+
+    const subida = await sembrarDocumento({ storageKey, titulo: doc.name });
+
+    await prisma.fileVersion.upsert({
+      where: { id: versionId },
+      update: {},
+      create: {
+        id: versionId,
+        fileId: doc.id,
+        version: 1,
+        storageKey,
+        originalName: nombreArchivo,
+        mimeType: 'application/pdf',
+        sizeBytes: BigInt(subida?.sizeBytes ?? 120_000),
+        uploadedById: tecnico.id,
+        uploadStatus: UploadStatus.COMPLETED,
+      },
+    });
+
+    await prisma.projectFile.update({
+      where: { id: doc.id },
+      data: { currentVersionId: versionId },
+    });
   }
 
-  console.log('3 documentos de ejemplo\n');
+  console.log('3 documentos de ejemplo, cada uno con su PDF');
+
+  await avisarSiNoHayAlmacenamiento();
+  console.log('');
 
   // ---------------- Resumen ----------------
   console.log('='.repeat(58));

@@ -78,6 +78,11 @@ export class RendersService {
               width: true,
               height: true,
               createdAt: true,
+              // Hace falta en la rejilla para decidir que icono/visor usar
+              // cuando la version no es una imagen (video, glTF, CAD...):
+              // sin esto, el frontend intentaba cargar el binario como <img>
+              // y mostraba el aviso de "no se pudo cargar la imagen".
+              mimeType: true,
             },
           },
           _count: { select: { versions: true } },

@@ -3,21 +3,10 @@ packages:
   - 'packages/*'
 
 allowBuilds:
-  '@prisma/client': set this to true or false
-  '@prisma/engines': set this to true or false
-  '@scarf/scarf': set this to true or false
-  argon2: set this to true or false
-  prisma: set this to true or false
-  sharp: set this to true or false
-  unrs-resolver: set this to true or false
-
-# pnpm bloquea los scripts de postinstall por defecto (supply-chain).
-# Estos paquetes SI los necesitan: prisma descarga sus engines,
-# argon2 y sharp compilan binarios nativos.
-onlyBuiltDependencies:
-  - '@prisma/client'
-  - '@prisma/engines'
-  - prisma
-  - argon2
-  - sharp
-  - unrs-resolver
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@scarf/scarf': false
+  argon2: true
+  prisma: true
+  sharp: true
+  unrs-resolver: false

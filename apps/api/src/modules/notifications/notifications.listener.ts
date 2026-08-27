@@ -13,6 +13,22 @@ import {
 } from '../../common/events/domain-events';
 
 /**
+ * Textos de los avisos de decision sobre una propuesta.
+ *
+ * Redactados a mano y no derivados del enum: el valor interno
+ * (NUEVA_VERSION, EN_REVISION...) no sirve como texto de cara al cliente,
+ * que es quien lee esto en el portal y en el correo.
+ */
+const APPROVAL_DECISION_TITLES: Partial<Record<ApprovalStatus, string>> = {
+  [ApprovalStatus.APROBADO]: 'Propuesta aprobada',
+  [ApprovalStatus.RECHAZADO]: 'Propuesta rechazada',
+  [ApprovalStatus.EN_REVISION]: 'Propuesta en revisión',
+  [ApprovalStatus.NUEVA_VERSION]: 'Propuesta con nueva versión',
+  [ApprovalStatus.CAMBIOS_SOLICITADOS]: 'El cliente solicitó cambios',
+  [ApprovalStatus.PENDIENTE]: 'Propuesta pendiente de revisión',
+};
+
+/**
  * Traduce eventos de dominio en notificaciones.
  *
  * Vive aparte de los servicios de negocio a proposito: renders.service no
@@ -94,6 +110,15 @@ export class NotificationsListener {
     });
   }
 
+  /**
+   * Titulo de la notificacion segun la decision tomada.
+   *
+   * Antes se interpolaba `event.status.toLowerCase()`, que sacaba el valor
+   * interno del enum a la interfaz y al correo del cliente: "Propuesta
+   * nueva_version", "Propuesta en_revision", "Propuesta aprobado". Estos
+   * textos los lee el cliente final, asi que van redactados, con acentos y
+   * con la concordancia correcta.
+   */
   @OnEvent(EVENTS.APPROVAL_DECIDED)
   async onApprovalDecided(event: ApprovalDecidedEvent): Promise<void> {
     const cambios = event.status === ApprovalStatus.CAMBIOS_SOLICITADOS;
@@ -105,9 +130,7 @@ export class NotificationsListener {
       type: cambios
         ? NotificationType.CAMBIOS_SOLICITADOS
         : NotificationType.APROBACION_RESUELTA,
-      title: cambios
-        ? 'El cliente solicito cambios'
-        : `Propuesta ${event.status.toLowerCase()}`,
+      title: APPROVAL_DECISION_TITLES[event.status] ?? 'Propuesta actualizada',
       body: event.comment
         ? `${event.targetLabel} - ${event.comment}`
         : event.targetLabel,

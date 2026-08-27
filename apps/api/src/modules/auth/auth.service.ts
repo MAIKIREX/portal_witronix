@@ -130,11 +130,35 @@ export class AuthService {
       throw new UnauthorizedException('Esta cuenta esta desactivada');
     }
 
-    // Consumir el token actual y emitir el siguiente de la misma familia.
-    await this.prisma.refreshToken.update({
-      where: { id: stored.id },
+    // Consumo ATOMICO del token.
+    //
+    // La comprobacion de `revokedAt` de mas arriba no basta por si sola: entre
+    // aquella lectura y esta escritura hay una ventana en la que otra peticion
+    // puede haber consumido el mismo token. Con un update simple, dos refresh
+    // simultaneos con el mismo token pasaban AMBOS la comprobacion y ambos
+    // recibian credenciales validas, sin que saltara la deteccion de reuso.
+    //
+    // Al condicionar el UPDATE a `revokedAt: null`, PostgreSQL bloquea la fila
+    // y solo una de las peticiones concurrentes puede modificarla; el resto
+    // obtiene count 0 y se trata como lo que es: un reuso.
+    const consumed = await this.prisma.refreshToken.updateMany({
+      where: { id: stored.id, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+
+    if (consumed.count === 0) {
+      // Alguien se nos adelanto. Un cliente legitimo y un atacante que corre
+      // en paralelo son indistinguibles aqui, asi que se aplica la misma
+      // politica que ante un reuso secuencial: revocar la familia entera.
+      this.logger.warn(
+        `Consumo concurrente del mismo refresh token (usuario ${stored.userId}). ` +
+          `Revocando familia ${stored.familyId}.`,
+      );
+      await this.revokeFamily(stored.familyId);
+      throw new UnauthorizedException(
+        'Sesion comprometida. Vuelve a iniciar sesion.',
+      );
+    }
 
     return this.issueTokens(stored.user, stored.familyId, ctx);
   }

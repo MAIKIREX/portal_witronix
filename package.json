@@ -8,9 +8,9 @@
   },
   "packageManager": "pnpm@11.24.0",
   "scripts": {
-    "dev": "pnpm --parallel --filter \"./apps/**\" dev",
-    "dev:api": "pnpm --filter @witronix/shared build && pnpm --filter @witronix/api start:dev",
-    "dev:web": "pnpm --filter @witronix/web dev",
+    "dev": "pnpm build:shared && pnpm --parallel --filter \"./apps/**\" dev",
+    "dev:api": "pnpm build:shared && pnpm --filter @witronix/api start:dev",
+    "dev:web": "pnpm build:shared && pnpm --filter @witronix/web dev",
     "build": "pnpm --filter @witronix/shared build && pnpm -r --filter=!@witronix/shared build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",

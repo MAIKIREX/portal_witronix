@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   CanActivate,
   ExecutionContext,
   ForbiddenException,
@@ -13,6 +14,13 @@ import {
   type AuthUser,
   type ProjectAccessOptions,
 } from '../decorators';
+
+/**
+ * Acepta cualquier version de UUID: Prisma usa la 4, pero validar solo el
+ * formato general evita romper si algun dia se generan de otra version.
+ */
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Verifica que el usuario tenga acceso al proyecto de la ruta.
@@ -52,6 +60,21 @@ export class ProjectAccessGuard implements CanActivate {
 
     if (!projectId) {
       throw new NotFoundException('Proyecto no especificado');
+    }
+
+    // Comprobacion de formato ANTES de tocar la base de datos.
+    //
+    // En Nest los guards se ejecutan ANTES que los pipes, asi que el
+    // ParseUUIDPipe del controlador todavia no ha validado nada cuando
+    // llegamos aqui. Sin esta guarda, un id malformado se enviaba tal cual a
+    // Prisma, que reventaba, y el cliente recibia un 500 "Error al acceder a
+    // la base de datos" en lugar de un 400. Ademas de ser el codigo
+    // equivocado, convertia cualquier URL con una errata en un error de
+    // servidor y ensuciaba la monitorizacion.
+    if (!UUID_PATTERN.test(projectId)) {
+      throw new BadRequestException(
+        `El identificador de proyecto no es valido: ${paramName}`,
+      );
     }
 
     const project = await this.prisma.project.findUnique({
