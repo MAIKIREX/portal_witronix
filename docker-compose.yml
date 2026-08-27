@@ -1,0 +1,86 @@
+# Infraestructura de desarrollo local - Portal Witronix
+# Levantar con: pnpm infra:up
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: witronix_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-witronix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-witronix_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-witronix_portal}
+      # Todo en UTC: las aprobaciones registran hora y una discrepancia
+      # de zona horaria es un problema de trazabilidad, no cosmetico.
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-witronix} -d ${POSTGRES_DB:-witronix_portal}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  minio:
+    image: minio/minio:latest
+    container_name: witronix_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-witronix}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-witronix_dev_secret}
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
+      # CORS a nivel de SERVIDOR. MinIO no implementa la API de CORS por
+      # bucket (`mc cors set` devuelve "functionality is not implemented"),
+      # asi que la unica forma de configurarlo es esta variable.
+      # Sin ella el navegador bloquea el PUT directo a las presigned URLs.
+      MINIO_API_CORS_ALLOW_ORIGIN: ${MINIO_CORS_ORIGINS:-http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"      # API S3
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"  # Consola web
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # Job de un solo uso: crea el bucket y aplica la politica CORS.
+  # Sin el CORS, el navegador rechaza el PUT directo a las presigned URLs.
+  minio-init:
+    image: minio/mc:latest
+    container_name: witronix_minio_init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-witronix}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-witronix_dev_secret}
+      MINIO_BUCKET: ${MINIO_BUCKET:-witronix-portal}
+    entrypoint: ["/bin/sh", "/scripts/init.sh"]
+    volumes:
+      - ./docker/minio:/scripts:ro
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: witronix_mailpit
+    restart: unless-stopped
+    environment:
+      MP_MAX_MESSAGES: 500
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"  # SMTP
+      - "${MAILPIT_UI_PORT:-8025}:8025"    # UI web
+
+volumes:
+  postgres_data:
+    name: witronix_postgres_data
+  minio_data:
+    name: witronix_minio_data

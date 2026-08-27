@@ -1,0 +1,506 @@
+// =============================================================
+// Portal Witronix - Esquema de base de datos
+// Gestion de proyectos de iluminacion, domotica e inmotica
+//
+// Principios de diseno:
+//  1. Las versiones son INMUTABLES: nunca se sobrescribe un archivo.
+//  2. Borrado logico (deletedAt) en todo lo que tenga historial.
+//  3. Todo acceso pasa por ProjectMember, nunca por el id que manda el cliente.
+//  4. Polimorfismo (targetType + targetId) validado en servicio, no en BD.
+// =============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------- ENUMS -------------------------
+// Espejo de packages/shared/src/enums/index.ts.
+// Prisma no puede importar TypeScript: si cambias uno, cambia el otro.
+
+enum Role {
+  ADMIN
+  PROJECT_MANAGER
+  TECHNICIAN
+  CLIENT
+}
+
+enum ProjectStatus {
+  POR_INICIAR
+  EN_DISENO
+  ESPERANDO_CLIENTE
+  APROBADO
+  EN_INSTALACION
+  FINALIZADO
+  CANCELADO
+}
+
+enum ProjectRole {
+  OWNER
+  MANAGER
+  COLLABORATOR
+  VIEWER
+}
+
+enum FileCategory {
+  RENDER
+  PLANO
+  FICHA_TECNICA
+  CERTIFICACION
+  COTIZACION
+  CONTRATO
+  MANUAL
+  VIDEO
+  OTRO
+}
+
+enum RenderType {
+  INTERIOR
+  EXTERIOR
+  NOCTURNO
+  ALTERNATIVA
+  ANTES_DESPUES
+  VIDEO
+  RECORRIDO_3D
+  PANORAMA_360
+}
+
+enum ApprovalStatus {
+  PENDIENTE
+  EN_REVISION
+  CAMBIOS_SOLICITADOS
+  NUEVA_VERSION
+  APROBADO
+  RECHAZADO
+}
+
+enum TargetType {
+  PROJECT
+  PROJECT_FILE
+  FILE_VERSION
+  RENDER
+  RENDER_VERSION
+  COMMENT
+}
+
+enum UploadStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum NotificationType {
+  NUEVO_ARCHIVO
+  NUEVO_RENDER
+  NUEVA_VERSION
+  NUEVO_COMENTARIO
+  RESPUESTA_COMENTARIO
+  APROBACION_PENDIENTE
+  APROBACION_RESUELTA
+  CAMBIOS_SOLICITADOS
+  MIEMBRO_AGREGADO
+  INVITACION
+}
+
+// ------------------- IDENTIDAD Y ACCESO -------------------
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String?
+  name         String
+  phone        String?
+  avatarKey    String?
+  role         Role
+  clientId     String?   @db.Uuid
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  notifications       Notification[]
+  invitationsSent     Invitation[]         @relation("InvitationInvitedBy")
+  projectMemberships  ProjectMember[]      @relation("MemberUser")
+  membershipsAdded    ProjectMember[]      @relation("MemberAddedBy")
+  projectsCreated     Project[]            @relation("ProjectCreatedBy")
+  filesCreated        ProjectFile[]        @relation("FileCreatedBy")
+  fileVersions        FileVersion[]        @relation("FileVersionUploadedBy")
+  rendersCreated      Render[]             @relation("RenderCreatedBy")
+  renderVersions      RenderVersion[]      @relation("RenderVersionUploadedBy")
+  comments            Comment[]            @relation("CommentAuthor")
+  commentsResolved    Comment[]            @relation("CommentResolvedBy")
+  approvalsRequested  Approval[]           @relation("ApprovalRequestedBy")
+  approvalsDecided    Approval[]           @relation("ApprovalDecidedBy")
+  approvalEvents      ApprovalEvent[]
+  activityLogs        ActivityLog[]
+
+  @@index([clientId])
+  @@index([role])
+  @@map("users")
+}
+
+model Invitation {
+  id          String    @id @default(uuid()) @db.Uuid
+  email       String
+  role        Role
+  clientId    String?   @db.Uuid
+  invitedById String    @db.Uuid
+  // Solo el hash. El token en claro viaja unicamente en el email.
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  client    Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  invitedBy User    @relation("InvitationInvitedBy", fields: [invitedById], references: [id])
+
+  @@index([email])
+  @@index([expiresAt])
+  @@map("invitations")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  // Rotacion con deteccion de reuso: si llega un token ya consumido,
+  // alguien tiene una copia robada -> se revoca la familia entera.
+  familyId  String    @db.Uuid
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+// ------------------------ NEGOCIO ------------------------
+
+model Client {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  taxId        String?
+  contactEmail String?
+  phone        String?
+  address      String?
+  logoKey      String?
+  notes        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  users       User[]
+  projects    Project[]
+  invitations Invitation[]
+
+  @@index([isActive])
+  @@map("clients")
+}
+
+model Project {
+  id          String        @id @default(uuid()) @db.Uuid
+  clientId    String        @db.Uuid
+  code        String        @unique // PRY-2026-001, legible para humanos
+  name        String
+  description String?
+  location    String?
+  status      ProjectStatus @default(POR_INICIAR)
+  progress    Int           @default(0) // 0-100
+  coverKey    String?
+  startDate   DateTime?
+  targetDate  DateTime?
+  endDate     DateTime?
+  createdById String        @db.Uuid
+  archivedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  client    Client @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  createdBy User   @relation("ProjectCreatedBy", fields: [createdById], references: [id])
+
+  members     ProjectMember[]
+  files       ProjectFile[]
+  renders     Render[]
+  comments    Comment[]
+  approvals   Approval[]
+  activityLog ActivityLog[]
+
+  @@index([clientId, status])
+  @@index([status])
+  @@map("projects")
+}
+
+// Tabla critica para la seguridad: es la que consulta el guard en cada request.
+model ProjectMember {
+  id          String      @id @default(uuid()) @db.Uuid
+  projectId   String      @db.Uuid
+  userId      String      @db.Uuid
+  projectRole ProjectRole @default(VIEWER)
+  addedById   String      @db.Uuid
+  createdAt   DateTime    @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation("MemberUser", fields: [userId], references: [id], onDelete: Cascade)
+  addedBy User    @relation("MemberAddedBy", fields: [addedById], references: [id])
+
+  @@unique([projectId, userId])
+  // "dame mis proyectos" es la consulta mas frecuente del portal
+  @@index([userId])
+  @@map("project_members")
+}
+
+// -------------------- ARCHIVOS Y VERSIONES --------------------
+
+model ProjectFile {
+  id                String       @id @default(uuid()) @db.Uuid
+  projectId         String       @db.Uuid
+  category          FileCategory
+  name              String
+  description       String?
+  currentVersionId  String?      @unique @db.Uuid
+  // Permite subir borradores internos sin exponerlos al cliente
+  isVisibleToClient Boolean      @default(true)
+  createdById       String       @db.Uuid
+  deletedAt         DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  project        Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy      User          @relation("FileCreatedBy", fields: [createdById], references: [id])
+  currentVersion FileVersion?  @relation("FileCurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  versions       FileVersion[] @relation("FileVersions")
+
+  @@index([projectId, category])
+  @@index([deletedAt])
+  @@map("project_files")
+}
+
+// INMUTABLE: nunca se actualiza ni se borra. La trazabilidad de
+// aprobaciones depende de que esta fila siga existiendo igual.
+model FileVersion {
+  id           String       @id @default(uuid()) @db.Uuid
+  fileId       String       @db.Uuid
+  version      Int
+  storageKey   String       @unique
+  originalName String
+  mimeType     String
+  sizeBytes    BigInt
+  checksum     String?
+  notes        String?
+  uploadedById String       @db.Uuid
+  // La fila se crea ANTES de que el navegador suba a MinIO.
+  // Si la subida se abandona, queda PENDING y un job la purga.
+  uploadStatus UploadStatus @default(PENDING)
+  createdAt    DateTime     @default(now())
+
+  file       ProjectFile  @relation("FileVersions", fields: [fileId], references: [id], onDelete: Cascade)
+  uploadedBy User         @relation("FileVersionUploadedBy", fields: [uploadedById], references: [id])
+  currentOf  ProjectFile? @relation("FileCurrentVersion")
+
+  @@unique([fileId, version])
+  @@index([uploadStatus, createdAt])
+  @@map("file_versions")
+}
+
+model Render {
+  id                String     @id @default(uuid()) @db.Uuid
+  projectId         String     @db.Uuid
+  title             String
+  area              String? // "Recepcion", "Lobby principal"
+  type              RenderType @default(INTERIOR)
+  description       String?
+  currentVersionId  String?    @unique @db.Uuid
+  isVisibleToClient Boolean    @default(true)
+  createdById       String     @db.Uuid
+  deletedAt         DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy      User            @relation("RenderCreatedBy", fields: [createdById], references: [id])
+  currentVersion RenderVersion?  @relation("RenderCurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  versions       RenderVersion[] @relation("RenderVersions")
+
+  @@index([projectId, type])
+  @@index([deletedAt])
+  @@map("renders")
+}
+
+// INMUTABLE, igual que FileVersion.
+model RenderVersion {
+  id           String         @id @default(uuid()) @db.Uuid
+  renderId     String         @db.Uuid
+  version      Int
+  storageKey   String         @unique
+  thumbnailKey String?
+  originalName String
+  mimeType     String
+  sizeBytes    BigInt
+  width        Int?
+  height       Int?
+  status       ApprovalStatus @default(PENDIENTE)
+  notes        String?
+  uploadedById String         @db.Uuid
+  uploadStatus UploadStatus   @default(PENDING)
+  createdAt    DateTime       @default(now())
+
+  render     Render  @relation("RenderVersions", fields: [renderId], references: [id], onDelete: Cascade)
+  uploadedBy User    @relation("RenderVersionUploadedBy", fields: [uploadedById], references: [id])
+  currentOf  Render? @relation("RenderCurrentVersion")
+
+  @@unique([renderId, version])
+  @@index([uploadStatus, createdAt])
+  @@map("render_versions")
+}
+
+// ---------------------- COLABORACION ----------------------
+
+model Comment {
+  id         String     @id @default(uuid()) @db.Uuid
+  // Desnormalizado a proposito: permite filtrar por proyecto
+  // sin resolver el join polimorfico.
+  projectId  String     @db.Uuid
+  authorId   String     @db.Uuid
+  body       String
+  parentId   String?    @db.Uuid
+  targetType TargetType
+  targetId   String     @db.Uuid
+  // Relativos (0-1), NO en pixeles: el render se muestra escalado
+  // segun la pantalla y coordenadas absolutas quedarian descolocadas.
+  anchorX      Float?
+  anchorY      Float?
+  isInternal   Boolean   @default(false)
+  resolvedAt   DateTime?
+  resolvedById String?   @db.Uuid
+  editedAt     DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author     User      @relation("CommentAuthor", fields: [authorId], references: [id])
+  resolvedBy User?     @relation("CommentResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+  parent     Comment?  @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    Comment[] @relation("CommentThread")
+
+  @@index([projectId, createdAt])
+  @@index([targetType, targetId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model Approval {
+  id            String         @id @default(uuid()) @db.Uuid
+  projectId     String         @db.Uuid
+  targetType    TargetType
+  targetId      String         @db.Uuid
+  status        ApprovalStatus @default(PENDIENTE)
+  requestedById String         @db.Uuid
+  requestedAt   DateTime       @default(now())
+  decidedById   String?        @db.Uuid
+  decidedAt     DateTime?
+  comment       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestedBy User            @relation("ApprovalRequestedBy", fields: [requestedById], references: [id])
+  decidedBy   User?           @relation("ApprovalDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+  events      ApprovalEvent[]
+
+  @@index([projectId, status])
+  @@index([targetType, targetId])
+  @@map("approvals")
+}
+
+// Append-only. Approval guarda el estado actual; esto guarda COMO se llego ahi.
+// Un solo campo status no puede responder "aprobado por quien, cuando, que version".
+model ApprovalEvent {
+  id         String          @id @default(uuid()) @db.Uuid
+  approvalId String          @db.Uuid
+  fromStatus ApprovalStatus?
+  toStatus   ApprovalStatus
+  actorId    String          @db.Uuid
+  comment    String?
+  createdAt  DateTime        @default(now())
+
+  approval Approval @relation(fields: [approvalId], references: [id], onDelete: Cascade)
+  actor    User     @relation(fields: [actorId], references: [id])
+
+  @@index([approvalId, createdAt])
+  @@map("approval_events")
+}
+
+// ------------------------ SISTEMA ------------------------
+
+model Notification {
+  id          String           @id @default(uuid()) @db.Uuid
+  userId      String           @db.Uuid
+  type        NotificationType
+  title       String
+  body        String?
+  link        String?
+  projectId   String?          @db.Uuid
+  targetType  TargetType?
+  targetId    String?          @db.Uuid
+  readAt      DateTime?
+  emailSentAt DateTime?
+  createdAt   DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// Append-only, escrito por un interceptor global. Nunca se edita.
+model ActivityLog {
+  id          String      @id @default(uuid()) @db.Uuid
+  projectId   String?     @db.Uuid
+  actorId     String?     @db.Uuid
+  action      String // "render.version.published"
+  targetType  TargetType?
+  targetId    String?     @db.Uuid
+  // Nombre legible EN EL MOMENTO del evento: si el render se renombra
+  // despues, el timeline sigue contando la historia correctamente.
+  targetLabel String?
+  metadata    Json?
+  ipAddress   String?
+  createdAt   DateTime    @default(now())
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  actor   User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, createdAt])
+  @@index([actorId, createdAt])
+  @@map("activity_logs")
+}
