@@ -19,13 +19,15 @@ export function RenderThumbnail({
   renderId,
   title,
   mimeType,
+  filename,
 }: {
   renderId: string;
   title: string;
   /** MIME de la version actual, tal como llega en el listado. */
   mimeType: string | null | undefined;
+  filename?: string | null;
 }) {
-  const kind = mediaKindFor(mimeType);
+  const kind = mediaKindFor(mimeType, filename);
   const { data, isLoading, renew } = useRenderView(
     renderId,
     undefined,

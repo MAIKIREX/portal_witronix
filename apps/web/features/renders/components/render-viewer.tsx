@@ -81,7 +81,9 @@ function RenderContent({
   // Anclar un punto solo tiene sentido sobre una imagen: un video se mueve en
   // el tiempo y un modelo 3D en el espacio, ninguno tiene una superficie
   // plana estable donde fijar una coordenada 0-1.
-  const isImage = mediaKindFor(selected?.mimeType) === "image";
+  const isImage =
+    mediaKindFor(selected?.mimeType, selected?.originalName ?? view.data?.url) ===
+    "image";
 
   // Los comentarios se anclan a la VERSION concreta, no al render: cada
   // version tiene sus propias marcas y no se arrastran de una a otra.
@@ -144,6 +146,7 @@ function RenderContent({
                   mimeType={selected?.mimeType}
                   src={view.data.url}
                   alt={render.title}
+                  filename={selected?.originalName}
                   onRenew={view.renew}
                   className="size-full"
                   imageClassName="rounded-none"
@@ -166,6 +169,7 @@ function RenderContent({
                   mimeType={selected?.mimeType}
                   src={view.data.url}
                   alt={render.title}
+                  filename={selected?.originalName}
                   onRenew={view.renew}
                   className="size-full min-h-96"
                 />

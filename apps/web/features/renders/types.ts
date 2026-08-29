@@ -54,6 +54,7 @@ export interface RenderListItem extends Render {
     | "width"
     | "height"
     | "createdAt"
+    | "originalName"
     | "mimeType"
   > | null;
   _count: { versions: number };

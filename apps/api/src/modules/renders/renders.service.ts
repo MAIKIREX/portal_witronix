@@ -82,6 +82,7 @@ export class RendersService {
               // cuando la version no es una imagen (video, glTF, CAD...):
               // sin esto, el frontend intentaba cargar el binario como <img>
               // y mostraba el aviso de "no se pudo cargar la imagen".
+              originalName: true,
               mimeType: true,
             },
           },

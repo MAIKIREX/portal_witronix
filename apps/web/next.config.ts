@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   // transpilePackages NO hace falta para @witronix/shared:
   //   (a) Turbopack (bundler por defecto en Next 16) transpila automaticamente los
   //       paquetes de un workspace pnpm.

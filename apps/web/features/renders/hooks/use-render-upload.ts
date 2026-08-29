@@ -33,6 +33,14 @@ const INITIAL: UploadState = { phase: "idle", progress: 0, error: null };
  * Si el paso 3 no llega a ejecutarse, la version queda en PENDING y un proceso
  * programado la limpia, asi que un fallo a medias no deja basura permanente.
  */
+function resolveUploadMimeType(file: File): string {
+  if (file.type && file.type !== "application/octet-stream") return file.type;
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  if (ext === "glb") return "model/gltf-binary";
+  if (ext === "gltf") return "model/gltf+json";
+  return file.type || "application/octet-stream";
+}
+
 export function useRenderUpload() {
   const [state, setState] = useState<UploadState>(INITIAL);
   const controllerRef = useRef<AbortController | null>(null);
@@ -90,7 +98,7 @@ export function useRenderUpload() {
           // application/octet-stream siempre que la extension este en su
           // lista de extensiones tecnicas (ver TECHNICAL_EXTENSIONS);
           // mandar "" tal cual seria "Tipo de archivo no permitido: ".
-          mimeType: file.type || "application/octet-stream",
+          mimeType: resolveUploadMimeType(file),
           sizeBytes: file.size,
         });
 
@@ -123,7 +131,7 @@ export function useRenderUpload() {
           // application/octet-stream siempre que la extension este en su
           // lista de extensiones tecnicas (ver TECHNICAL_EXTENSIONS);
           // mandar "" tal cual seria "Tipo de archivo no permitido: ".
-          mimeType: file.type || "application/octet-stream",
+          mimeType: resolveUploadMimeType(file),
           sizeBytes: file.size,
           notes,
         });

@@ -19,6 +19,7 @@ export function RenderMedia({
   mimeType,
   src,
   alt,
+  filename,
   thumbnailUrl,
   onRenew,
   className,
@@ -27,12 +28,13 @@ export function RenderMedia({
   mimeType: string | null | undefined;
   src: string;
   alt: string;
+  filename?: string | null;
   thumbnailUrl?: string | null;
   onRenew?: () => void;
   className?: string;
   imageClassName?: string;
 }) {
-  const kind = mediaKindFor(mimeType);
+  const kind = mediaKindFor(mimeType, filename ?? src);
 
   if (kind === "video") {
     return (

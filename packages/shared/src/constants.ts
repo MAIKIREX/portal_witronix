@@ -11,7 +11,13 @@ export const MIME_GROUPS = {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   ],
   // Formatos propios del sector: fotometria (IES/LDT), CAD y BIM.
-  TECHNICAL: ['application/octet-stream', 'image/vnd.dwg', 'application/acad', 'model/gltf-binary'],
+  TECHNICAL: [
+    'application/octet-stream',
+    'image/vnd.dwg',
+    'application/acad',
+    'model/gltf-binary',
+    'model/gltf+json',
+  ],
   ARCHIVE: ['application/zip', 'application/x-7z-compressed', 'application/x-rar-compressed'],
 } as const;
 

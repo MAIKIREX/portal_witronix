@@ -76,6 +76,7 @@ function RenderCard({
         renderId={render.id}
         title={render.title}
         mimeType={render.currentVersion?.mimeType}
+        filename={render.currentVersion?.originalName}
       />
 
       <div className="space-y-2 p-3">
