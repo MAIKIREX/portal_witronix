@@ -1,6 +1,25 @@
 import type { ApprovalStatus, TargetType } from "@witronix/shared";
 import type { PaginationQuery, UserRef } from "@/types/api";
 
+export interface ApprovalTargetSummary {
+  id: string;
+  targetType: TargetType;
+  title: string;
+  label?: string;
+  version?: number;
+  area?: string;
+  category?: string;
+  renderType?: string;
+  renderId?: string;
+  fileId?: string;
+  mimeType?: string | null;
+  originalName?: string | null;
+  sizeBytes?: string;
+  thumbnailUrl?: string | null;
+  viewUrl?: string | null;
+  downloadUrl?: string | null;
+}
+
 export interface Approval {
   id: string;
   projectId: string;
@@ -16,6 +35,8 @@ export interface Approval {
   updatedAt: string;
   requestedBy: UserRef;
   decidedBy: UserRef | null;
+  target?: ApprovalTargetSummary | null;
+  targetLabel?: string;
 }
 
 export interface ApprovalListItem extends Approval {

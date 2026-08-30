@@ -9,6 +9,7 @@ import { ApprovalStatus, Prisma, TargetType } from '@prisma/client';
 import { APPROVAL_TRANSITIONS, canTransition } from '@witronix/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ProjectAccessService } from '../../common/services/project-access.service';
+import { StorageService } from '../storage/storage.service';
 import { paginated, type PaginatedResult } from '../../common/dto/pagination.dto';
 import {
   EVENTS,
@@ -29,6 +30,7 @@ const APPROVAL_SORT_FIELDS = ['status', 'createdAt', 'updatedAt', 'requestedAt',
 export class ApprovalsService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
     private readonly access: ProjectAccessService,
     private readonly events: EventEmitter2,
   ) {}
@@ -64,7 +66,24 @@ export class ApprovalsService {
       this.prisma.approval.count({ where }),
     ]);
 
-    return paginated(data, total, query);
+    const itemsWithTargets = await Promise.all(
+      data.map(async (approval) => {
+        const target = await this.resolveTargetSummary(
+          approval.targetType,
+          approval.targetId,
+          approval.projectId,
+          true,
+        ).catch(() => null);
+
+        return {
+          ...approval,
+          target,
+          targetLabel: target?.label ?? undefined,
+        };
+      }),
+    );
+
+    return paginated(itemsWithTargets, total, query);
   }
 
   async findOne(approvalId: string, user: AuthUser) {
@@ -85,8 +104,17 @@ export class ApprovalsService {
     }
     await this.access.assertMember(approval.projectId, user);
 
+    const target = await this.resolveTargetSummary(
+      approval.targetType,
+      approval.targetId,
+      approval.projectId,
+      true,
+    ).catch(() => null);
+
     return {
       ...approval,
+      target,
+      targetLabel: target?.label ?? undefined,
       // El frontend usa esto para saber que botones ofrecer, en vez de
       // reimplementar las reglas de transicion por su cuenta.
       transicionesPosibles: APPROVAL_TRANSITIONS[approval.status],
@@ -269,53 +297,149 @@ export class ApprovalsService {
 
   // ------------------------- INTERNOS -------------------------
 
+  /** Resumen completo del objetivo con URLs y metadatos para UI rica */
+  async resolveTargetSummary(
+    targetType: TargetType,
+    targetId: string,
+    projectId: string,
+    generateUrls = true,
+  ) {
+    switch (targetType) {
+      case TargetType.RENDER_VERSION: {
+        const v = await this.prisma.renderVersion.findFirst({
+          where: { id: targetId, render: { projectId, deletedAt: null } },
+          include: {
+            render: {
+              select: { id: true, title: true, area: true, type: true },
+            },
+          },
+        });
+        if (!v) return null;
+
+        let thumbnailUrl: string | null = null;
+        let viewUrl: string | null = null;
+        if (generateUrls) {
+          if (v.thumbnailKey) {
+            thumbnailUrl = await this.storage
+              .createDownloadUrl(v.thumbnailKey)
+              .catch(() => null);
+          } else if (v.storageKey && v.mimeType?.startsWith('image/')) {
+            thumbnailUrl = await this.storage
+              .createDownloadUrl(v.storageKey)
+              .catch(() => null);
+          }
+          if (v.storageKey) {
+            viewUrl = await this.storage
+              .createDownloadUrl(v.storageKey)
+              .catch(() => null);
+          }
+        }
+
+        return {
+          id: v.id,
+          targetType,
+          title: v.render.title,
+          version: v.version,
+          label: `${v.render.title} (V${v.version})`,
+          area: v.render.area,
+          renderType: v.render.type,
+          renderId: v.render.id,
+          mimeType: v.mimeType,
+          originalName: v.originalName,
+          thumbnailUrl,
+          viewUrl,
+        };
+      }
+      case TargetType.FILE_VERSION: {
+        const v = await this.prisma.fileVersion.findFirst({
+          where: { id: targetId, file: { projectId, deletedAt: null } },
+          include: {
+            file: {
+              select: { id: true, name: true, category: true },
+            },
+          },
+        });
+        if (!v) return null;
+
+        let viewUrl: string | null = null;
+        let downloadUrl: string | null = null;
+        if (generateUrls && v.storageKey) {
+          viewUrl = await this.storage
+            .createDownloadUrl(v.storageKey)
+            .catch(() => null);
+          downloadUrl = await this.storage
+            .createDownloadUrl(v.storageKey, v.originalName)
+            .catch(() => null);
+        }
+
+        return {
+          id: v.id,
+          targetType,
+          title: v.file.name,
+          version: v.version,
+          label: `${v.file.name} (V${v.version})`,
+          category: v.file.category,
+          fileId: v.file.id,
+          mimeType: v.mimeType,
+          originalName: v.originalName,
+          sizeBytes: v.sizeBytes.toString(),
+          viewUrl,
+          downloadUrl,
+        };
+      }
+      case TargetType.RENDER: {
+        const r = await this.prisma.render.findFirst({
+          where: { id: targetId, projectId, deletedAt: null },
+          select: { id: true, title: true, area: true, type: true },
+        });
+        if (!r) return null;
+        return {
+          id: r.id,
+          targetType,
+          title: r.title,
+          label: r.title,
+          area: r.area,
+          renderType: r.type,
+          renderId: r.id,
+        };
+      }
+      case TargetType.PROJECT_FILE: {
+        const f = await this.prisma.projectFile.findFirst({
+          where: { id: targetId, projectId, deletedAt: null },
+          select: { id: true, name: true, category: true },
+        });
+        if (!f) return null;
+        return {
+          id: f.id,
+          targetType,
+          title: f.name,
+          label: f.name,
+          category: f.category,
+          fileId: f.id,
+        };
+      }
+      default:
+        return null;
+    }
+  }
+
   /** Nombre legible del objetivo, y de paso valida que sea del proyecto. */
   private async resolveTargetLabel(
     targetType: TargetType,
     targetId: string,
     projectId: string,
   ): Promise<string> {
-    switch (targetType) {
-      case TargetType.RENDER_VERSION: {
-        const v = await this.prisma.renderVersion.findFirst({
-          where: { id: targetId, render: { projectId, deletedAt: null } },
-          include: { render: { select: { title: true } } },
-        });
-        if (!v) break;
-        return `${v.render.title} V${v.version}`;
-      }
-      case TargetType.FILE_VERSION: {
-        const v = await this.prisma.fileVersion.findFirst({
-          where: { id: targetId, file: { projectId, deletedAt: null } },
-          include: { file: { select: { name: true } } },
-        });
-        if (!v) break;
-        return `${v.file.name} V${v.version}`;
-      }
-      case TargetType.RENDER: {
-        const r = await this.prisma.render.findFirst({
-          where: { id: targetId, projectId, deletedAt: null },
-          select: { title: true },
-        });
-        if (!r) break;
-        return r.title;
-      }
-      case TargetType.PROJECT_FILE: {
-        const f = await this.prisma.projectFile.findFirst({
-          where: { id: targetId, projectId, deletedAt: null },
-          select: { name: true },
-        });
-        if (!f) break;
-        return f.name;
-      }
-      default:
-        throw new BadRequestException(
-          `No se pueden solicitar aprobaciones sobre ${targetType}`,
-        );
-    }
-
-    throw new BadRequestException(
-      'El elemento a aprobar no existe en este proyecto',
+    const summary = await this.resolveTargetSummary(
+      targetType,
+      targetId,
+      projectId,
+      false,
     );
+    if (!summary) {
+      throw new BadRequestException(
+        'El elemento a aprobar no existe en este proyecto',
+      );
+    }
+    return summary.label;
   }
 }
