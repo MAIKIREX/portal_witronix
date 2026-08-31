@@ -9,12 +9,17 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
     <GuestGuard>
       <div className="flex min-h-svh flex-col items-center justify-center px-4 py-10">
         <div className="w-full max-w-sm space-y-6">
-          <div className="space-y-1 text-center">
-            <p className="font-heading text-primary text-lg font-semibold tracking-tight">
-              Witronix
-            </p>
-            <p className="text-muted-foreground text-sm">
-              Portal de proyectos
+          <div className="space-y-2 text-center">
+            <div className="mx-auto flex h-14 w-auto items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/logo-de-witronix-color-blanco.webp"
+                alt="Witronix LED Logo"
+                className="h-11 w-auto object-contain drop-shadow-[0_0_16px_rgba(73,191,229,0.35)]"
+              />
+            </div>
+            <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+              Portal de Proyectos
             </p>
           </div>
           {children}

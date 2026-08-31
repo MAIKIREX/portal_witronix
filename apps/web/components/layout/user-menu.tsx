@@ -43,8 +43,7 @@ export function UserMenu() {
     try {
       await authApi.logoutAll();
     } catch {
-      // Si falla en el servidor se cierra igualmente en local: no dejar al
-      // usuario atrapado dentro por un error de red.
+      // Si falla en el servidor se cierra igualmente en local
     }
     await logout();
     sileo.info({ title: "Se han cerrado todas tus sesiones" });
@@ -59,36 +58,30 @@ export function UserMenu() {
             render={
               <SidebarMenuButton
                 size="lg"
-                className="data-[popup-open]:bg-sidebar-accent"
+                className="data-[popup-open]:bg-white/20 hover:bg-white/15 text-white rounded-2xl p-2 transition-colors"
               />
             }
           >
-            <Avatar className="size-8 rounded-lg">
-              <AvatarFallback className="rounded-lg text-xs">
+            <Avatar className="size-8 rounded-full border border-white/40 bg-white/20 text-white shrink-0">
+              <AvatarFallback className="rounded-full text-xs font-bold text-white bg-white/20">
                 {initials(user.name)}
               </AvatarFallback>
             </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{user.name}</span>
-              <span className="text-muted-foreground truncate text-xs">
+            <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+              <span className="truncate font-semibold text-white">{user.name}</span>
+              <span className="text-white/70 truncate text-xs">
                 {ROLE_LABELS[user.role]}
               </span>
             </div>
-            <ChevronsUpDown className="ml-auto size-4" />
+            <ChevronsUpDown className="ml-auto size-4 text-white/70 group-data-[collapsible=icon]:hidden" />
           </DropdownMenuTrigger>
 
-          {/* El ancho lo fija ya el propio componente con --anchor-width
-              (Base UI). No uses las variables --radix-*: aqui no existen. */}
           <DropdownMenuContent
             className="min-w-56"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
-            {/* Cabecera informativa, no un DropdownMenuLabel: en Base UI ese
-                componente es un GroupLabel y falla si no esta dentro de un
-                <DropdownMenuGroup>. Ademas aqui no etiqueta a un grupo de
-                opciones, solo identifica al usuario. */}
             <div className="grid px-1.5 py-1 text-sm">
               <span className="truncate font-medium">{user.name}</span>
               <span className="text-muted-foreground truncate text-xs">
@@ -113,5 +106,82 @@ export function UserMenu() {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
+  );
+}
+
+export function NavbarUserMenu() {
+  const user = useCurrentUser();
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+
+  async function handleLogout() {
+    setBusy(true);
+    await logout();
+    router.replace("/login");
+  }
+
+  async function handleLogoutAll() {
+    setBusy(true);
+    try {
+      await authApi.logoutAll();
+    } catch {
+      // Si falla en el servidor se cierra igualmente en local
+    }
+    await logout();
+    sileo.info({ title: "Se han cerrado todas tus sesiones" });
+    router.replace("/login");
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <button
+            type="button"
+            className="group flex items-center gap-2.5 rounded-full border border-border bg-white/80 dark:bg-[#0d1926]/75 px-2.5 py-1.5 backdrop-blur-xs transition-all duration-200 hover:border-primary/50 hover:bg-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40 select-none cursor-pointer shadow-2xs"
+          />
+        }
+      >
+        <Avatar className="size-8 rounded-full border border-primary/25 bg-primary/10">
+          <AvatarFallback className="rounded-full text-xs font-semibold text-primary">
+            {initials(user.name)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="hidden sm:grid text-left text-xs leading-tight pr-1">
+          <span className="font-semibold text-foreground truncate max-w-[130px]">
+            {user.name}
+          </span>
+          <span className="text-muted-foreground text-[10px] truncate max-w-[130px]">
+            {user.email}
+          </span>
+        </div>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent className="min-w-56" align="end" sideOffset={6}>
+        <div className="grid px-2 py-1.5 text-xs">
+          <span className="truncate font-semibold text-foreground">{user.name}</span>
+          <span className="text-muted-foreground truncate text-[11px]">
+            {user.email}
+          </span>
+          <span className="text-primary truncate text-[10px] font-medium mt-0.5">
+            {ROLE_LABELS[user.role]}
+          </span>
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem render={<Link href="/perfil" />}>
+          <User />
+          Mi cuenta
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem disabled={busy} onClick={handleLogoutAll}>
+          <MonitorSmartphone />
+          Cerrar sesión en todos los dispositivos
+        </DropdownMenuItem>
+        <DropdownMenuItem disabled={busy} onClick={handleLogout}>
+          <LogOut />
+          Cerrar sesión
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

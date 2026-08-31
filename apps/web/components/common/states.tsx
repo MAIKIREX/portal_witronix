@@ -17,10 +17,12 @@ export function EmptyState({
   icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-12 text-center">
-      <Icon className="text-muted-foreground size-6" />
+    <div className="flex flex-col items-center justify-center gap-3 rounded-[24px] border border-dashed border-border/60 bg-card/40 px-6 py-12 text-center">
+      <div className="size-12 rounded-full border border-border/50 bg-background/50 flex items-center justify-center text-muted-foreground shadow-xs">
+        <Icon className="size-6 text-muted-foreground" />
+      </div>
       <div className="space-y-1">
-        <p className="font-medium">{title}</p>
+        <p className="font-heading font-semibold text-foreground">{title}</p>
         {description && (
           <p className="text-muted-foreground max-w-sm text-sm">
             {description}
@@ -42,11 +44,13 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="flex flex-col items-center justify-center gap-3 rounded-lg border px-6 py-12 text-center"
+      className="flex flex-col items-center justify-center gap-3 rounded-[24px] border border-destructive/20 bg-destructive/5 px-6 py-12 text-center"
     >
-      <AlertCircle className="text-destructive size-6" />
+      <div className="size-12 rounded-full border border-destructive/20 bg-destructive/10 flex items-center justify-center text-destructive shadow-xs">
+        <AlertCircle className="text-destructive size-6" />
+      </div>
       <div className="space-y-1">
-        <p className="font-medium">{titleFor(error)}</p>
+        <p className="font-heading font-semibold text-foreground">{titleFor(error)}</p>
         <p className="text-muted-foreground max-w-sm text-sm">
           {error.message}
         </p>

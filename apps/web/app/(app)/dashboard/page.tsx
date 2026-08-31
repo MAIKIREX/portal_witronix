@@ -8,7 +8,7 @@ export default function DashboardPage() {
   const user = useCurrentUser();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         title={`Hola, ${user.name.split(" ")[0]}`}
         description="Resumen de tus proyectos y novedades recientes."

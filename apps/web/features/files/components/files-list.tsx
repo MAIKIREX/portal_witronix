@@ -105,10 +105,13 @@ export function FilesList({ projectId }: { projectId: string }) {
         }
       >
         {(page) => (
-          <div className="overflow-hidden rounded-lg border">
+          <div className="relative w-full overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="border-b border-border hover:bg-transparent">
+                  <TableHead className="w-14 font-mono text-[11px] text-muted-foreground/80">
+                    (#)
+                  </TableHead>
                   <TableHead>Documento</TableHead>
                   <TableHead className="hidden sm:table-cell">
                     Categoria
@@ -121,26 +124,30 @@ export function FilesList({ projectId }: { projectId: string }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {page.data.map((file) => (
-                  <TableRow key={file.id}>
+                {page.data.map((file, index) => (
+                  <TableRow
+                    key={file.id}
+                    className="group border-b border-border/70 hover:bg-[#ecf2f9]/50 transition-colors"
+                  >
+                    <TableCell className="w-14 font-mono text-xs text-muted-foreground/50 tabular-nums">
+                      ({String(index + 1).padStart(2, "0")})
+                    </TableCell>
                     <TableCell>
                       <Link
                         href={`/proyectos/${projectId}/archivos/${file.id}`}
-                        className="hover:text-primary block font-medium transition-colors"
+                        className="group-hover:text-primary block font-medium text-base text-foreground transition-colors"
                       >
                         {file.name}
                       </Link>
-                      <span className="text-muted-foreground text-xs">
+                      <span className="text-muted-foreground text-xs font-mono">
                         {file.currentVersion?.originalName ?? "sin archivo"}
                         {file._count.versions > 1 && (
-                          <span className="ml-2 inline-flex items-center gap-1">
+                          <span className="ml-2 inline-flex items-center gap-1 font-sans">
                             <Layers className="size-3" />
                             {file._count.versions}
                           </span>
                         )}
                       </span>
-                      {/* Solo el equipo ve documentos ocultos al cliente, asi
-                          que el aviso solo puede aparecerle a el. */}
                       {!file.isVisibleToClient && (
                         <span className="text-muted-foreground ml-2 inline-flex items-center gap-1 text-xs">
                           <EyeOff className="size-3" />
@@ -148,13 +155,13 @@ export function FilesList({ projectId }: { projectId: string }) {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-muted-foreground hidden text-sm sm:table-cell">
+                    <TableCell className="text-muted-foreground hidden text-sm sm:table-cell font-normal">
                       {FILE_CATEGORY_LABELS[file.category]}
                     </TableCell>
-                    <TableCell className="text-muted-foreground hidden text-sm md:table-cell">
+                    <TableCell className="text-muted-foreground hidden text-sm md:table-cell font-mono tabular-nums">
                       {formatBytes(file.currentVersion?.sizeBytes)}
                     </TableCell>
-                    <TableCell className="text-muted-foreground hidden text-sm lg:table-cell">
+                    <TableCell className="text-muted-foreground hidden text-sm lg:table-cell font-mono tabular-nums">
                       {formatDate(file.updatedAt)}
                     </TableCell>
                     <TableCell>

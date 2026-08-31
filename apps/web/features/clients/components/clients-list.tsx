@@ -17,7 +17,8 @@ import { DataState, EmptyState } from "@/components/common/states";
 import { useApi } from "@/hooks/use-api";
 import { useMutation } from "@/hooks/use-mutation";
 import { useCurrentUser } from "@/features/auth/hooks/use-session";
-import { TONE_CLASSES } from "@/lib/labels";
+import { TONE_CLASSES, TONE_DOT_CLASSES } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 import type { Paginated } from "@/types/api";
 import { clientsApi } from "../api";
 import type { Client } from "../types";
@@ -71,10 +72,13 @@ export function ClientsList() {
         }
       >
         {(page) => (
-          <div className="overflow-hidden rounded-lg border">
+          <div className="relative w-full overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="border-b border-border hover:bg-transparent">
+                  <TableHead className="w-14 font-mono text-[11px] text-muted-foreground/80">
+                    (#)
+                  </TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead className="hidden sm:table-cell">
                     Contacto
@@ -84,9 +88,10 @@ export function ClientsList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {page.data.map((client) => (
+                {page.data.map((client, index) => (
                   <ClientRow
                     key={client.id}
+                    index={index}
                     client={client}
                     canDeactivate={user.role === Role.ADMIN}
                     onChanged={refetch}
@@ -103,10 +108,12 @@ export function ClientsList() {
 
 function ClientRow({
   client,
+  index,
   canDeactivate,
   onChanged,
 }: {
   client: Client;
+  index: number;
   canDeactivate: boolean;
   onChanged: () => void | Promise<void>;
 }) {
@@ -122,9 +129,12 @@ function ClientRow({
   );
 
   return (
-    <TableRow>
+    <TableRow className="group border-b border-border/70 hover:bg-[#ecf2f9]/50 transition-colors">
+      <TableCell className="w-14 font-mono text-xs text-muted-foreground/50 tabular-nums">
+        ({String(index + 1).padStart(2, "0")})
+      </TableCell>
       <TableCell>
-        <p className="font-medium">{client.name}</p>
+        <p className="font-medium text-base text-foreground">{client.name}</p>
         {client.taxId && (
           <p className="text-muted-foreground font-mono text-xs">
             {client.taxId}
@@ -139,13 +149,23 @@ function ClientRow({
       </TableCell>
       <TableCell>
         <span
-          className={`inline-flex rounded-md px-2 py-0.5 text-xs font-medium ${
-            client.isActive
-              ? TONE_CLASSES.success
-              : TONE_CLASSES.neutral
-          }`}
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap tracking-wide shadow-2xs backdrop-blur-xs",
+            client.isActive ? TONE_CLASSES.success : TONE_CLASSES.neutral,
+          )}
         >
-          {client.isActive ? "Activo" : "Inactivo"}
+          <span
+            className={cn(
+              "size-1.5 rounded-full shrink-0",
+              client.isActive
+                ? TONE_DOT_CLASSES.success
+                : TONE_DOT_CLASSES.neutral,
+            )}
+            aria-hidden="true"
+          />
+          <span className="leading-tight">
+            {client.isActive ? "Activo" : "Inactivo"}
+          </span>
         </span>
       </TableCell>
       <TableCell>

@@ -6,6 +6,7 @@ import {
   NOTIFICATION_TYPE_LABELS,
   NOTIFICATION_TYPE_TONES,
   TONE_CLASSES,
+  TONE_DOT_CLASSES,
 } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 import type { Notification } from "../types";
@@ -36,7 +37,7 @@ export function NotificationItem({
       <span
         className={cn(
           "mt-1.5 size-2 shrink-0 rounded-full",
-          unread ? TONE_CLASSES[tone].split(" ")[0] : "bg-transparent",
+          unread ? TONE_DOT_CLASSES[tone] : "bg-transparent",
         )}
         aria-hidden="true"
       />

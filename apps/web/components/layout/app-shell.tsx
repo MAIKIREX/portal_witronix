@@ -5,10 +5,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
-import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import { AppSidebar } from "./app-sidebar";
-import { BreadcrumbProvider, Breadcrumbs } from "./breadcrumbs";
+import { BreadcrumbProvider } from "./breadcrumbs";
 
 /**
  * Estructura de la aplicacion autenticada: barra lateral colapsable + cabecera
@@ -22,21 +20,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <BreadcrumbProvider>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
-          <header className="bg-background/95 sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4 backdrop-blur">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-1 data-[orientation=vertical]:h-4"
-            />
-            <Breadcrumbs />
-            <div className="ml-auto">
-              <NotificationBell />
-            </div>
-          </header>
+        <SidebarInset className="bg-transparent">
+          {/* Disparador flotante discreto exclusivo para movil cuando el sidebar esta colapsado */}
+          <div className="md:hidden fixed top-3 left-3 z-30 pointer-events-none">
+            <SidebarTrigger className="pointer-events-auto text-[#19314d] size-9 rounded-full border border-border bg-white/90 shadow-md backdrop-blur-xs" />
+          </div>
 
-          <main className="flex-1 px-4 py-8 md:px-6">
-            <div className="mx-auto w-full max-w-6xl">{children}</div>
+          <main className="flex-1 px-4 sm:px-8 py-6">
+            <div className="w-full">{children}</div>
           </main>
         </SidebarInset>
       </SidebarProvider>

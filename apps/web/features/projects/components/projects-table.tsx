@@ -12,31 +12,42 @@ import {
 } from "@/components/ui/table";
 import { ProjectStatusBadge } from "@/components/common/status-badge";
 import { formatDate } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { ProjectListItem } from "../types";
 
 export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="relative w-full overflow-x-auto">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="border-b border-border hover:bg-transparent">
+            <TableHead className="w-14 font-mono text-[11px] text-muted-foreground/80">
+              (#)
+            </TableHead>
             <TableHead>Proyecto</TableHead>
             <TableHead className="hidden md:table-cell">Cliente</TableHead>
             <TableHead>Estado</TableHead>
             <TableHead className="hidden lg:table-cell">Avance</TableHead>
             <TableHead className="hidden lg:table-cell">Contenido</TableHead>
-            <TableHead className="hidden sm:table-cell">
+            <TableHead className="hidden sm:table-cell text-right">
               Actualizado
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {projects.map((project) => (
-            <TableRow key={project.id}>
+          {projects.map((project, index) => (
+            <TableRow
+              key={project.id}
+              className="group border-b border-border/70 hover:bg-[#ecf2f9]/50 transition-colors"
+            >
+              <TableCell className="w-14 font-mono text-xs text-muted-foreground/50 tabular-nums">
+                ({String(index + 1).padStart(2, "0")})
+              </TableCell>
+
               <TableCell>
                 <Link
                   href={`/proyectos/${project.id}`}
-                  className="hover:text-primary block font-medium transition-colors"
+                  className="group-hover:text-primary block font-medium text-base text-foreground transition-colors"
                 >
                   {project.name}
                 </Link>
@@ -51,7 +62,7 @@ export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
                 )}
               </TableCell>
 
-              <TableCell className="text-muted-foreground hidden text-sm md:table-cell">
+              <TableCell className="text-muted-foreground hidden text-sm md:table-cell font-normal">
                 {project.client.name}
               </TableCell>
 
@@ -82,7 +93,7 @@ export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
                 </div>
               </TableCell>
 
-              <TableCell className="text-muted-foreground hidden text-sm sm:table-cell">
+              <TableCell className="text-muted-foreground hidden text-sm sm:table-cell text-right font-mono tabular-nums">
                 {formatDate(project.updatedAt)}
               </TableCell>
             </TableRow>
@@ -93,25 +104,56 @@ export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
   );
 }
 
-export function ProgressBar({ value }: { value: number }) {
+export function ProgressBar({
+  value,
+  className,
+  showLabel = true,
+  size = "md",
+}: {
+  value: number;
+  className?: string;
+  showLabel?: boolean;
+  size?: "sm" | "md" | "lg";
+}) {
+  const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  const isComplete = clamped === 100;
+
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn("inline-flex items-center gap-2.5", className)}>
       <div
-        className="bg-muted h-1.5 w-20 overflow-hidden rounded-full"
+        className={cn(
+          "relative overflow-hidden rounded-full bg-slate-200/90 dark:bg-white/[0.12]",
+          size === "sm" ? "h-1.5 w-16" : size === "lg" ? "h-2 w-32" : "h-1.5 w-20 sm:w-24",
+        )}
         role="progressbar"
-        aria-valuenow={value}
+        aria-valuenow={clamped}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="Avance del proyecto"
       >
         <div
-          className="bg-primary h-full rounded-full transition-all"
-          style={{ width: `${value}%` }}
+          className={cn(
+            "h-full rounded-full transition-all duration-300 ease-out",
+            isComplete
+              ? "bg-emerald-500 dark:bg-emerald-400"
+              : "bg-[#00cc99] dark:bg-[#00ffbf]",
+          )}
+          style={{ width: `${clamped}%` }}
         />
       </div>
-      <span className="text-muted-foreground text-xs tabular-nums">
-        {value}%
-      </span>
+
+      {showLabel && (
+        <span
+          className={cn(
+            "font-mono text-xs font-semibold tabular-nums tracking-tight",
+            isComplete
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-slate-700 dark:text-slate-200",
+          )}
+        >
+          {clamped}%
+        </span>
+      )}
     </div>
   );
 }

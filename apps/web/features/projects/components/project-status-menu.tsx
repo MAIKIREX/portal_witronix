@@ -13,7 +13,12 @@ import {
 import { ProjectStatusBadge } from "@/components/common/status-badge";
 import { useMutation } from "@/hooks/use-mutation";
 import { usePermissions } from "@/features/auth/hooks/use-permissions";
-import { PROJECT_STATUS_LABELS } from "@/lib/labels";
+import {
+  PROJECT_STATUS_LABELS,
+  PROJECT_STATUS_TONES,
+  TONE_DOT_CLASSES,
+} from "@/lib/labels";
+import { cn } from "@/lib/utils";
 import { projectsApi } from "../api";
 import { useProject } from "../context";
 
@@ -61,8 +66,15 @@ export function ProjectStatusMenu() {
               key={status}
               disabled={isPending}
               onClick={() => void mutate(status)}
+              className="flex items-center gap-2"
             >
-              {PROJECT_STATUS_LABELS[status]}
+              <span
+                className={cn(
+                  "size-1.5 rounded-full shrink-0",
+                  TONE_DOT_CLASSES[PROJECT_STATUS_TONES[status]],
+                )}
+              />
+              <span>{PROJECT_STATUS_LABELS[status]}</span>
             </DropdownMenuItem>
           ),
         )}

@@ -25,27 +25,43 @@ export type Tone =
   | "active";
 
 export const TONE_CLASSES: Record<Tone, string> = {
-  neutral: "bg-tone-neutral text-tone-neutral-fg",
-  info: "bg-tone-info text-tone-info-fg",
-  success: "bg-tone-success text-tone-success-fg",
-  warning: "bg-tone-warning text-tone-warning-fg",
-  danger: "bg-tone-danger text-tone-danger-fg",
-  active: "bg-tone-active text-tone-active-fg",
+  neutral:
+    "bg-gradient-to-r from-slate-700 to-slate-800 text-slate-100 border border-slate-500/40 shadow-xs shadow-slate-950/20",
+  info:
+    "bg-gradient-to-r from-cyan-600 to-sky-600 text-cyan-50 border border-cyan-400/40 shadow-xs shadow-cyan-950/25",
+  success:
+    "bg-gradient-to-r from-emerald-600 to-teal-600 text-emerald-50 border border-emerald-400/40 shadow-xs shadow-emerald-950/25",
+  warning:
+    "bg-gradient-to-r from-amber-600 to-amber-500 text-amber-50 border border-amber-300/50 shadow-xs shadow-amber-950/25",
+  danger:
+    "bg-gradient-to-r from-red-600 to-rose-600 text-rose-50 border border-red-400/50 shadow-xs shadow-red-950/30",
+  active:
+    "bg-gradient-to-r from-indigo-600 to-blue-600 text-indigo-50 border border-indigo-400/40 shadow-xs shadow-indigo-950/25",
+};
+
+/** Clases para el punto indicador luminoso de cada tono */
+export const TONE_DOT_CLASSES: Record<Tone, string> = {
+  neutral: "bg-slate-200 shadow-[0_0_8px_rgba(241,245,249,0.9)]",
+  info: "bg-cyan-100 shadow-[0_0_8px_rgba(207,250,254,0.95)]",
+  success: "bg-emerald-100 shadow-[0_0_8px_rgba(209,250,229,0.95)]",
+  warning: "bg-amber-100 shadow-[0_0_8px_rgba(254,243,199,0.95)]",
+  danger: "bg-red-100 shadow-[0_0_8px_rgba(254,202,202,0.95)]",
+  active: "bg-indigo-100 shadow-[0_0_8px_rgba(224,231,255,0.95)]",
 };
 
 export const ROLE_LABELS: Record<Role, string> = {
   [Role.ADMIN]: "Administrador",
   [Role.PROJECT_MANAGER]: "Jefe de proyecto",
-  [Role.TECHNICIAN]: "Tecnico",
+  [Role.TECHNICIAN]: "Técnico",
   [Role.CLIENT]: "Cliente",
 };
 
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
   [ProjectStatus.POR_INICIAR]: "Por iniciar",
-  [ProjectStatus.EN_DISENO]: "En diseno",
+  [ProjectStatus.EN_DISENO]: "En diseño",
   [ProjectStatus.ESPERANDO_CLIENTE]: "Esperando al cliente",
   [ProjectStatus.APROBADO]: "Aprobado",
-  [ProjectStatus.EN_INSTALACION]: "En instalacion",
+  [ProjectStatus.EN_INSTALACION]: "En instalación",
   [ProjectStatus.FINALIZADO]: "Finalizado",
   [ProjectStatus.CANCELADO]: "Cancelado",
 };
@@ -62,9 +78,9 @@ export const PROJECT_STATUS_TONES: Record<ProjectStatus, Tone> = {
 
 export const APPROVAL_STATUS_LABELS: Record<ApprovalStatus, string> = {
   [ApprovalStatus.PENDIENTE]: "Pendiente",
-  [ApprovalStatus.EN_REVISION]: "En revision",
+  [ApprovalStatus.EN_REVISION]: "En revisión",
   [ApprovalStatus.CAMBIOS_SOLICITADOS]: "Cambios solicitados",
-  [ApprovalStatus.NUEVA_VERSION]: "Nueva version",
+  [ApprovalStatus.NUEVA_VERSION]: "Nueva versión",
   [ApprovalStatus.APROBADO]: "Aprobado",
   [ApprovalStatus.RECHAZADO]: "Rechazado",
 };
@@ -90,7 +106,7 @@ export const RENDER_TYPE_LABELS: Record<RenderType, string> = {
   [RenderType.EXTERIOR]: "Exterior",
   [RenderType.NOCTURNO]: "Nocturno",
   [RenderType.ALTERNATIVA]: "Alternativa",
-  [RenderType.ANTES_DESPUES]: "Antes / despues",
+  [RenderType.ANTES_DESPUES]: "Antes / después",
   [RenderType.VIDEO]: "Video",
   [RenderType.RECORRIDO_3D]: "Recorrido 3D",
   [RenderType.PANORAMA_360]: "Panorama 360",
@@ -99,17 +115,17 @@ export const RENDER_TYPE_LABELS: Record<RenderType, string> = {
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   [NotificationType.NUEVO_ARCHIVO]: "Documento nuevo",
   [NotificationType.NUEVO_RENDER]: "Render nuevo",
-  [NotificationType.NUEVA_VERSION]: "Version nueva",
+  [NotificationType.NUEVA_VERSION]: "Versión nueva",
   [NotificationType.NUEVO_COMENTARIO]: "Comentario nuevo",
   [NotificationType.RESPUESTA_COMENTARIO]: "Respuesta a tu comentario",
-  [NotificationType.APROBACION_PENDIENTE]: "Aprobacion pendiente",
-  [NotificationType.APROBACION_RESUELTA]: "Aprobacion resuelta",
+  [NotificationType.APROBACION_PENDIENTE]: "Aprobación pendiente",
+  [NotificationType.APROBACION_RESUELTA]: "Aprobación resuelta",
   [NotificationType.CAMBIOS_SOLICITADOS]: "Cambios solicitados",
-  [NotificationType.MIEMBRO_AGREGADO]: "Te han anadido a un proyecto",
-  [NotificationType.INVITACION]: "Invitacion",
+  [NotificationType.MIEMBRO_AGREGADO]: "Te han añadido a un proyecto",
+  [NotificationType.INVITACION]: "Invitación",
 };
 
-/** Tono del punto que acompana a cada tipo de notificacion. */
+/** Tono del punto que acompaña a cada tipo de notificación. */
 export const NOTIFICATION_TYPE_TONES: Record<NotificationType, Tone> = {
   [NotificationType.NUEVO_ARCHIVO]: "info",
   [NotificationType.NUEVO_RENDER]: "info",
@@ -126,9 +142,9 @@ export const NOTIFICATION_TYPE_TONES: Record<NotificationType, Tone> = {
 export const FILE_CATEGORY_LABELS: Record<FileCategory, string> = {
   [FileCategory.RENDER]: "Render",
   [FileCategory.PLANO]: "Plano",
-  [FileCategory.FICHA_TECNICA]: "Ficha tecnica",
-  [FileCategory.CERTIFICACION]: "Certificacion",
-  [FileCategory.COTIZACION]: "Cotizacion",
+  [FileCategory.FICHA_TECNICA]: "Ficha técnica",
+  [FileCategory.CERTIFICACION]: "Certificación",
+  [FileCategory.COTIZACION]: "Cotización",
   [FileCategory.CONTRATO]: "Contrato",
   [FileCategory.MANUAL]: "Manual",
   [FileCategory.VIDEO]: "Video",

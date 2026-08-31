@@ -7,12 +7,76 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* Estas variables las inyecta next/font desde app/layout.tsx.
-     No las autorreferencies (--font-sans: var(--font-sans)) o no resuelven nunca
-     y todo cae al sans-serif del sistema. */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist-sans);
+  
+  --font-sans: var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: var(--font-outfit), sans-serif;
+  --font-display: var(--font-outfit), sans-serif;
+
+  /* Paleta Deep Space Blue */
+  --color-deep-space-blue-50: #ecf2f9;
+  --color-deep-space-blue-100: #d9e5f2;
+  --color-deep-space-blue-200: #b3cae6;
+  --color-deep-space-blue-300: #8cb0d9;
+  --color-deep-space-blue-400: #6696cc;
+  --color-deep-space-blue-500: #407bbf;
+  --color-deep-space-blue-600: #336399;
+  --color-deep-space-blue-700: #264a73;
+  --color-deep-space-blue-800: #19314d;
+  --color-deep-space-blue-900: #0d1926;
+  --color-deep-space-blue-950: #09111b;
+
+  /* Paleta Ink Black */
+  --color-ink-black-50: #e8ebfd;
+  --color-ink-black-100: #d0d8fb;
+  --color-ink-black-200: #a1b1f7;
+  --color-ink-black-300: #728af3;
+  --color-ink-black-400: #4363ef;
+  --color-ink-black-500: #143ceb;
+  --color-ink-black-600: #1030bc;
+  --color-ink-black-700: #0c248d;
+  --color-ink-black-800: #08185e;
+  --color-ink-black-900: #040c2f;
+  --color-ink-black-950: #030821;
+
+  /* Paleta Mint Cyan (White spectrum) */
+  --color-mint-50: #e5fff9;
+  --color-mint-100: #ccfff2;
+  --color-mint-200: #99ffe6;
+  --color-mint-300: #66ffd9;
+  --color-mint-400: #33ffcc;
+  --color-mint-500: #00ffbf;
+  --color-mint-600: #00cc99;
+  --color-mint-700: #009973;
+  --color-mint-800: #00664d;
+  --color-mint-900: #003326;
+  --color-mint-950: #00241b;
+
+  /* Paleta Ocean Mist */
+  --color-ocean-mist-50: #eef7f5;
+  --color-ocean-mist-100: #dcefea;
+  --color-ocean-mist-200: #baded6;
+  --color-ocean-mist-300: #97cec1;
+  --color-ocean-mist-400: #74bead;
+  --color-ocean-mist-500: #52ad98;
+  --color-ocean-mist-600: #418b7a;
+  --color-ocean-mist-700: #31685b;
+  --color-ocean-mist-800: #21453d;
+  --color-ocean-mist-900: #10231e;
+  --color-ocean-mist-950: #0b1815;
+
+  /* Paleta Taupe */
+  --color-taupe-50: #f4f2f0;
+  --color-taupe-100: #e9e4e2;
+  --color-taupe-200: #d3cac5;
+  --color-taupe-300: #bdafa8;
+  --color-taupe-400: #a7958b;
+  --color-taupe-500: #917a6e;
+  --color-taupe-600: #746258;
+  --color-taupe-700: #574942;
+  --color-taupe-800: #3a312c;
+  --color-taupe-900: #1d1816;
+  --color-taupe-950: #14110f;
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -21,11 +85,7 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
+  
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -42,17 +102,13 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* Tonos semanticos para badges de estado.
-     Los enums de dominio (ProjectStatus, ApprovalStatus) se mapean a estos tonos
-     en lib/labels.ts. Un unico sitio para el color de cada estado. */
   --color-tone-neutral: var(--tone-neutral);
   --color-tone-neutral-fg: var(--tone-neutral-fg);
   --color-tone-info: var(--tone-info);
@@ -68,120 +124,266 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --background: #f4f8fc;
+  --foreground: #09111b;
+  --card: #ffffff;
+  --card-foreground: #09111b;
+  --popover: #ffffff;
+  --popover-foreground: #09111b;
+  --primary: #264a73;
+  --primary-foreground: #ffffff;
+  --secondary: #ecf2f9;
+  --secondary-foreground: #19314d;
+  --muted: #ecf2f9;
+  --muted-foreground: #336399;
+  --accent: #d9e5f2;
+  --accent-foreground: #19314d;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #d9e5f2;
+  --input: #b3cae6;
+  --ring: #407bbf;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #19314d;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #264a73;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.12);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: transparent;
+  --sidebar-ring: #49bfe5;
 
-  /* Acento Witronix. Es el UNICO punto donde se define el color de marca:
-     cambiando estas tres lineas (y sus equivalentes en .dark) cambia toda la app. */
-  --primary: oklch(0.52 0.14 245);
-  --primary-foreground: oklch(0.985 0 0);
-  --ring: oklch(0.52 0.14 245);
-
-  /* Tonos de estado (fondo suave + texto legible sobre el) */
-  --tone-neutral: oklch(0.96 0.003 250);
-  --tone-neutral-fg: oklch(0.44 0.01 250);
-  --tone-info: oklch(0.94 0.035 245);
-  --tone-info-fg: oklch(0.45 0.13 245);
-  --tone-success: oklch(0.94 0.05 155);
-  --tone-success-fg: oklch(0.44 0.11 155);
-  --tone-warning: oklch(0.95 0.06 80);
-  --tone-warning-fg: oklch(0.47 0.11 65);
-  --tone-danger: oklch(0.95 0.04 25);
-  --tone-danger-fg: oklch(0.51 0.18 27);
-  --tone-active: oklch(0.94 0.045 295);
-  --tone-active-fg: oklch(0.47 0.15 295);
+  --tone-neutral: #ecf2f9;
+  --tone-neutral-fg: #264a73;
+  --tone-info: #dcefea;
+  --tone-info-fg: #009973;
+  --tone-success: #e5fff9;
+  --tone-success-fg: #00664d;
+  --tone-warning: #fef3c7;
+  --tone-warning-fg: #b45309;
+  --tone-danger: #fee2e2;
+  --tone-danger-fg: #b91c1c;
+  --tone-active: #e8ebfd;
+  --tone-active-fg: #143ceb;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #09111b;
+  --foreground: #ecf2f9;
+  --card: #0d1926;
+  --card-foreground: #ecf2f9;
+  --popover: #0d1926;
+  --popover-foreground: #ecf2f9;
+  
+  --primary: #00ffbf;
+  --primary-foreground: #030821;
+  
+  --secondary: #19314d;
+  --secondary-foreground: #ecf2f9;
+  --muted: #19314d;
+  --muted-foreground: #8cb0d9;
+  --accent: #10231e;
+  --accent-foreground: #00ffbf;
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+  --border: rgba(140, 176, 217, 0.15);
+  --input: rgba(140, 176, 217, 0.2);
+  --ring: #00ffbf;
+  
+  --sidebar: #040c2f;
+  --sidebar-foreground: #ecf2f9;
+  --sidebar-primary: #00ffbf;
+  --sidebar-primary-foreground: #030821;
+  --sidebar-accent: #08185e;
+  --sidebar-accent-foreground: #00ffbf;
+  --sidebar-border: rgba(140, 176, 217, 0.12);
+  --sidebar-ring: #00ffbf;
 
-  /* Acento Witronix en oscuro: mas claro para mantener contraste sobre fondo oscuro */
-  --primary: oklch(0.68 0.13 245);
-  --primary-foreground: oklch(0.18 0.02 245);
-  --ring: oklch(0.68 0.13 245);
-
-  --tone-neutral: oklch(0.28 0.005 250);
-  --tone-neutral-fg: oklch(0.76 0.01 250);
-  --tone-info: oklch(0.3 0.05 245);
-  --tone-info-fg: oklch(0.79 0.1 245);
-  --tone-success: oklch(0.3 0.05 155);
-  --tone-success-fg: oklch(0.79 0.11 155);
-  --tone-warning: oklch(0.31 0.05 75);
-  --tone-warning-fg: oklch(0.82 0.11 80);
-  --tone-danger: oklch(0.31 0.06 25);
-  --tone-danger-fg: oklch(0.79 0.12 25);
-  --tone-active: oklch(0.31 0.06 295);
-  --tone-active-fg: oklch(0.8 0.11 295);
+  --tone-neutral: rgba(140, 176, 217, 0.12);
+  --tone-neutral-fg: #b3cae6;
+  --tone-info: rgba(0, 255, 191, 0.15);
+  --tone-info-fg: #66ffd9;
+  --tone-success: rgba(0, 255, 191, 0.15);
+  --tone-success-fg: #33ffcc;
+  --tone-warning: rgba(245, 158, 11, 0.15);
+  --tone-warning-fg: #fde047;
+  --tone-danger: rgba(239, 68, 68, 0.15);
+  --tone-danger-fg: #fca5a5;
+  --tone-active: rgba(114, 138, 243, 0.15);
+  --tone-active-fg: #a1b1f7;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
+  
   html {
-    @apply font-sans;
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
   }
+
+  body {
+    background: linear-gradient(180deg, #ecf2f9 0%, #f4f8fc 40%, #ffffff 100%);
+    background-attachment: fixed;
+    color: var(--foreground);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.035em;
+    font-weight: 800;
+  }
+
+  ::selection {
+    background: rgba(64, 123, 191, 0.25);
+    color: #09111b;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f4f8fc;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #b3cae6;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #407bbf;
+  }
+}
+
+@utility glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #d9e5f2;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+@utility bg-grid-fine {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right,  rgba(64, 123, 191, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(64, 123, 191, 0.04) 1px, transparent 1px);
+}
+
+/* =========================================================
+   Witronix Button Hover Expanding Ripple Effect (btn-wtx)
+   ========================================================= */
+.btn-wtx {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  isolation: isolate;
+  -webkit-mask-image: -webkit-radial-gradient(#000, #fff);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-wtx:hover {
+  transform: scale(1.03);
+}
+
+.btn-wtx:active {
+  transform: scale(0.97);
+}
+
+.btn-wtx::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1), height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.btn-wtx:hover::before {
+  width: 320%;
+  height: 320%;
+}
+
+.btn-wtx > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Default (Primary) — Azul Witronix */
+.btn-wtx-default {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.btn-wtx-default::before {
+  background-color: #19314d;
+}
+.btn-wtx-default:hover {
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(38, 74, 115, 0.3);
+}
+
+/* Outline */
+.btn-wtx-outline {
+  border: 1px solid #b3cae6;
+  background-color: #ffffff;
+  color: #19314d;
+}
+.btn-wtx-outline::before {
+  background-color: #ecf2f9;
+}
+.btn-wtx-outline:hover {
+  border-color: #264a73;
+  color: #09111b;
+  box-shadow: 0 2px 8px rgba(38, 74, 115, 0.08);
+}
+
+/* Secondary */
+.btn-wtx-secondary {
+  background-color: var(--secondary);
+  border: 1px solid #d9e5f2;
+  color: var(--secondary-foreground);
+}
+.btn-wtx-secondary::before {
+  background-color: #d9e5f2;
+}
+.btn-wtx-secondary:hover {
+  border-color: #b3cae6;
+  color: #09111b;
+  box-shadow: 0 2px 8px rgba(38, 74, 115, 0.06);
+}
+
+/* Ghost */
+.btn-wtx-ghost {
+  background-color: transparent;
+  color: #19314d;
+}
+.btn-wtx-ghost::before {
+  background-color: #ecf2f9;
+}
+.btn-wtx-ghost:hover {
+  color: #09111b;
+}
+
+/* Destructive */
+.btn-wtx-destructive {
+  background-color: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: var(--destructive);
+}
+.btn-wtx-destructive::before {
+  background-color: #dc2626;
+}
+.btn-wtx-destructive:hover {
+  border-color: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
 }

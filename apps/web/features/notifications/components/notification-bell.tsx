@@ -60,14 +60,20 @@ export function NotificationBell() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
-        render={<Button variant="ghost" size="icon-sm" className="relative" />}
+        render={
+          <Button
+            variant="outline"
+            size="icon"
+            className="relative size-9 rounded-full border-border bg-white/80 dark:bg-[#0d1926]/75 hover:bg-white hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all duration-200 shadow-2xs"
+          />
+        }
         aria-label={
           unread > 0 ? `Notificaciones (${unread} sin leer)` : "Notificaciones"
         }
       >
-        <Bell />
+        <Bell className="size-4" />
         {unread > 0 && (
-          <span className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 flex min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-4 font-semibold">
+          <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex min-w-4 h-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-bold shadow-xs">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
