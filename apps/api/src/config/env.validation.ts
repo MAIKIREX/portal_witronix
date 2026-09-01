@@ -46,6 +46,7 @@ export const envSchema = z.object({
 
   // ---------- Storage (MinIO / compatible S3) ----------
   STORAGE_ENDPOINT: z.string().url(),
+  STORAGE_PUBLIC_ENDPOINT: z.string().url().optional(),
   STORAGE_REGION: z.string().default('us-east-1'),
   STORAGE_ACCESS_KEY: z.string().min(1),
   STORAGE_SECRET_KEY: z.string().min(1),

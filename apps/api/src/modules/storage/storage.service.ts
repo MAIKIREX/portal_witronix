@@ -39,6 +39,7 @@ export interface ObjectMetadata {
 export class StorageService implements OnModuleInit {
   private readonly logger = new Logger(StorageService.name);
   private readonly client: S3Client;
+  private readonly presignClient: S3Client;
   private readonly bucket: string;
   private readonly uploadTtl: number;
   private readonly downloadTtl: number;
@@ -59,6 +60,19 @@ export class StorageService implements OnModuleInit {
       // subdominio. Sin esto, MinIO devuelve 404 en todo.
       forcePathStyle: this.config.get('STORAGE_FORCE_PATH_STYLE', { infer: true }),
     });
+
+    const publicEndpoint = this.config.get('STORAGE_PUBLIC_ENDPOINT', { infer: true });
+    this.presignClient = publicEndpoint
+      ? new S3Client({
+          endpoint: publicEndpoint,
+          region: this.config.get('STORAGE_REGION', { infer: true }),
+          credentials: {
+            accessKeyId: this.config.get('STORAGE_ACCESS_KEY', { infer: true }),
+            secretAccessKey: this.config.get('STORAGE_SECRET_KEY', { infer: true }),
+          },
+          forcePathStyle: this.config.get('STORAGE_FORCE_PATH_STYLE', { infer: true }),
+        })
+      : this.client;
   }
 
   async onModuleInit(): Promise<void> {
@@ -113,7 +127,7 @@ export class StorageService implements OnModuleInit {
       ContentType: mimeType,
     });
 
-    const uploadUrl = await getSignedUrl(this.client, command, {
+    const uploadUrl = await getSignedUrl(this.presignClient, command, {
       expiresIn: this.uploadTtl,
     });
 
@@ -140,7 +154,7 @@ export class StorageService implements OnModuleInit {
         : {}),
     });
 
-    return getSignedUrl(this.client, command, { expiresIn: this.downloadTtl });
+    return getSignedUrl(this.presignClient, command, { expiresIn: this.downloadTtl });
   }
 
   /**
