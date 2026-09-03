@@ -26,13 +26,31 @@ export const metadata: Metadata = {
   },
 };
 
+const themeScript = `
+(function() {
+  try {
+    var stored = localStorage.getItem('witronix-theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (!stored && prefersDark) || (stored === 'system' && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es"
+      suppressHydrationWarning
       className={`${outfit.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body suppressHydrationWarning className="min-h-full flex flex-col font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

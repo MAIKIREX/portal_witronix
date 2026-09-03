@@ -24,7 +24,14 @@ export function VideoPlayer({
   className?: string;
 }) {
   const [error, setError] = useState(false);
+  const [shownSrc, setShownSrc] = useState(src);
   const retried = useRef(false);
+
+  if (src !== shownSrc) {
+    setShownSrc(src);
+    setError(false);
+    retried.current = false;
+  }
 
   function handleError() {
     if (!retried.current && onRenew) {

@@ -128,7 +128,7 @@ function DashboardContent({ summary }: { summary: DashboardSummary }) {
         </div>
 
         {/* Tarjeta 2: Pendientes de tu revisión */}
-        <div className="bento-item group relative overflow-hidden rounded-[26px] p-6 sm:p-7 bg-white border border-[#d9e5f2] shadow-xs flex flex-col justify-between min-h-[185px] transition-all duration-300 hover:border-[#336399]/50 hover:shadow-md">
+        <div className="bento-item group relative overflow-hidden rounded-[26px] p-6 sm:p-7 bg-card border border-border shadow-xs flex flex-col justify-between min-h-[185px] transition-all duration-300 hover:border-[#336399]/50 hover:shadow-md">
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-semibold text-muted-foreground tracking-wide">
               Pendientes de tu revisión
@@ -216,7 +216,7 @@ function DashboardContent({ summary }: { summary: DashboardSummary }) {
         {hasNews ? (
           <div className="grid gap-4 sm:grid-cols-3">
             {/* Archivos Nuevos */}
-            <div className="bento-item group relative overflow-hidden rounded-[24px] p-5 sm:p-6 bg-white border border-[#d9e5f2] shadow-xs flex flex-col justify-between min-h-[160px] transition-all duration-300 hover:border-primary/50 hover:shadow-md">
+            <div className="bento-item group relative overflow-hidden rounded-[24px] p-5 sm:p-6 bg-card border border-border shadow-xs flex flex-col justify-between min-h-[160px] transition-all duration-300 hover:border-primary/50 hover:shadow-md">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium text-muted-foreground">
                   Archivos nuevos
@@ -238,7 +238,7 @@ function DashboardContent({ summary }: { summary: DashboardSummary }) {
             </div>
 
             {/* Comentarios Nuevos */}
-            <div className="bento-item group relative overflow-hidden rounded-[24px] p-5 sm:p-6 bg-white border border-[#d9e5f2] shadow-xs flex flex-col justify-between min-h-[160px] transition-all duration-300 hover:border-primary/50 hover:shadow-md">
+            <div className="bento-item group relative overflow-hidden rounded-[24px] p-5 sm:p-6 bg-card border border-border shadow-xs flex flex-col justify-between min-h-[160px] transition-all duration-300 hover:border-primary/50 hover:shadow-md">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium text-muted-foreground">
                   Comentarios nuevos
@@ -260,7 +260,7 @@ function DashboardContent({ summary }: { summary: DashboardSummary }) {
             </div>
 
             {/* Aprobaciones Pendientes */}
-            <div className="bento-item group relative overflow-hidden rounded-[24px] p-5 sm:p-6 bg-white border border-[#d9e5f2] shadow-xs flex flex-col justify-between min-h-[160px] transition-all duration-300 hover:border-primary/50 hover:shadow-md">
+            <div className="bento-item group relative overflow-hidden rounded-[24px] p-5 sm:p-6 bg-card border border-border shadow-xs flex flex-col justify-between min-h-[160px] transition-all duration-300 hover:border-primary/50 hover:shadow-md">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium text-muted-foreground">
                   Aprobaciones pendientes
@@ -282,7 +282,7 @@ function DashboardContent({ summary }: { summary: DashboardSummary }) {
             </div>
           </div>
         ) : (
-          <div className="rounded-[24px] border border-dashed border-border/80 bg-white/60 p-8 text-center">
+          <div className="rounded-[24px] border border-dashed border-border/80 bg-card/60 p-8 text-center">
             <p className="text-muted-foreground text-sm">
               Sin novedades en los últimos días.
             </p>

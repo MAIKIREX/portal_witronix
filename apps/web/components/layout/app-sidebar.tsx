@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useCurrentUser } from "@/features/auth/hooks/use-session";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/common/theme-toggle";
 import { visibleNavItems } from "./nav-items";
 import { UserMenu } from "./user-menu";
 
@@ -96,12 +97,12 @@ export function AppSidebar() {
   }, [activeIndex, isCollapsed]);
 
   return (
-    <Sidebar collapsible="icon" className="border-r-0 bg-[#19314d] text-white">
+    <Sidebar collapsible="icon" className="border-0 border-r-0 border-y-0 bg-[#19314d] text-white shadow-none ring-0 outline-none">
       {/* Cabecera / Marca Witronix */}
-      <SidebarHeader className="px-4 pt-6 pb-4 flex items-center justify-center">
+      <SidebarHeader className="border-0 border-b-0 px-4 pt-6 pb-4 flex items-center justify-center shadow-none ring-0 outline-none">
         <Link
           href="/dashboard"
-          className="flex items-center justify-center transition-transform duration-200 hover:scale-105 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/40 rounded-xl"
+          className="flex items-center justify-center transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-0 rounded-xl shadow-none ring-0 outline-none"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -116,31 +117,31 @@ export function AppSidebar() {
       </SidebarHeader>
 
       {/* Lista de Navegación con Indicador Deslizante GSAP */}
-      <SidebarContent className="px-0 py-3 overflow-visible">
-        <SidebarGroup className="p-0">
-          <SidebarGroupContent>
-            <div ref={containerRef} className="relative">
+      <SidebarContent className="border-0 border-y-0 px-0 py-3 overflow-visible shadow-none ring-0 outline-none">
+        <SidebarGroup className="border-0 border-y-0 p-0 shadow-none ring-0 outline-none">
+          <SidebarGroupContent className="border-0 border-y-0 shadow-none ring-0 outline-none">
+            <div ref={containerRef} className="relative border-0 shadow-none ring-0 outline-none">
               {/* Indicador Activo Deslizante con esquinas cóncavas invertidas animadas */}
               {!isCollapsed && (
                 <div
                   ref={indicatorRef}
                   aria-hidden="true"
-                  className="pointer-events-none absolute top-0 -right-[1px] w-[calc(100%+2px)] z-10 opacity-0"
+                  className="pointer-events-none absolute top-0 -right-[1px] w-[calc(100%+2px)] z-10 opacity-0 shadow-none ring-0 outline-none"
                   style={{ height: 48 }}
                 >
                   {/* Curva cóncava superior (Top Inverted Fillet) */}
                   <span className="pointer-events-none absolute -top-5 right-0 h-5 w-5 fill-background z-20">
-                    <svg className="size-full fill-background" viewBox="0 0 20 20">
+                    <svg className="size-full fill-background border-0 shadow-none ring-0 outline-none" viewBox="0 0 20 20">
                       <path d="M20,0 L20,20 L0,20 A20,20 0 0,0 20,0 Z" />
                     </svg>
                   </span>
 
                   {/* Cuerpo de la pastilla activa blanca */}
-                  <div className="h-12 ml-4 bg-background rounded-l-full" />
+                  <div className="h-12 ml-4 bg-background rounded-l-full border-0 shadow-none ring-0 outline-none" />
 
                   {/* Curva cóncava inferior (Bottom Inverted Fillet) */}
                   <span className="pointer-events-none absolute -bottom-5 right-0 h-5 w-5 fill-background z-20">
-                    <svg className="size-full fill-background" viewBox="0 0 20 20">
+                    <svg className="size-full fill-background border-0 shadow-none ring-0 outline-none" viewBox="0 0 20 20">
                       <path d="M0,0 L20,0 L20,20 A20,20 0 0,0 0,0 Z" />
                     </svg>
                   </span>
@@ -148,22 +149,22 @@ export function AppSidebar() {
               )}
 
               {/* Lista de Ítems interactivos */}
-              <SidebarMenu className="gap-1.5 relative z-20">
+              <SidebarMenu className="gap-1.5 relative z-20 border-0 border-y-0 shadow-none ring-0 outline-none">
                 {mainItems.map((item, index) => {
                   const active = activeIndex === index;
 
                   if (isCollapsed) {
                     return (
-                      <SidebarMenuItem key={item.href} className="relative">
+                      <SidebarMenuItem key={item.href} className="relative border-0 border-y-0 shadow-none ring-0 outline-none">
                         <Tooltip>
                           <TooltipTrigger
                             render={
                               <Link
                                 href={item.href}
                                 className={cn(
-                                  "flex size-10 mx-auto items-center justify-center rounded-2xl transition-all duration-200",
+                                  "flex size-10 mx-auto items-center justify-center rounded-2xl transition-all duration-200 border-0 shadow-none ring-0 outline-none",
                                   active
-                                    ? "bg-background text-[#19314d] dark:text-[#49bfe5] shadow-xs scale-105"
+                                    ? "bg-background text-[#19314d] dark:text-[#49bfe5] scale-105"
                                     : "text-white/80 hover:text-white hover:bg-white/10"
                                 )}
                               >
@@ -181,7 +182,7 @@ export function AppSidebar() {
                   }
 
                   return (
-                    <SidebarMenuItem key={item.href} className="relative">
+                    <SidebarMenuItem key={item.href} className="relative border-0 border-y-0 shadow-none ring-0 outline-none">
                       <Link
                         ref={(el) => {
                           itemsRef.current[index] = el;
@@ -191,8 +192,8 @@ export function AppSidebar() {
                           moveIndicator(index, false);
                         }}
                         className={cn(
-                          "relative z-20 flex items-center gap-3.5 h-12 text-sm transition-colors duration-300",
-                          "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/40",
+                          "relative z-20 flex items-center gap-3.5 h-12 text-sm transition-colors duration-300 border-0 shadow-none ring-0 outline-none",
+                          "focus-visible:outline-none focus-visible:ring-0",
                           active
                             ? "text-[#19314d] dark:text-[#49bfe5] font-bold ml-4 pl-4.5 pr-4"
                             : "text-white/85 hover:text-white mx-4 px-4.5 font-medium hover:bg-white/10 rounded-full"
@@ -218,10 +219,18 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Pie de Barra Lateral */}
-      <SidebarFooter className="p-3 pt-2">
+      <SidebarFooter className="border-0 border-t-0 p-3 pt-2 shadow-none ring-0 outline-none space-y-1">
+        <ThemeToggle
+          variant={isCollapsed ? "icon" : "sidebar-item"}
+          align={isCollapsed ? "start" : "center"}
+          className={cn(
+            isCollapsed &&
+              "mx-auto text-white/80 hover:text-white hover:bg-white/10 border-0 bg-transparent dark:bg-transparent shadow-none size-10"
+          )}
+        />
         <UserMenu />
         {!isCollapsed && (
-          <div className="pt-2 pb-1 text-center text-[10px] text-white/50 tracking-wider font-medium select-none">
+          <div className="pt-2 pb-1 text-center text-[10px] text-white/50 tracking-wider font-medium select-none shadow-none ring-0 outline-none">
             WITRONIX LED · PORTAL
           </div>
         )}

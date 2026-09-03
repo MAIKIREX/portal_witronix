@@ -41,6 +41,7 @@ export function RenderImage({
   if (src !== shownSrc) {
     setShownSrc(src);
     setState("loading");
+    retried.current = false;
   }
 
   const fail = useCallback(() => {

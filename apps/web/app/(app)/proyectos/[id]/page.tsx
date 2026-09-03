@@ -11,8 +11,8 @@ export default function ProjectOverviewPage() {
   const { isStaff } = usePermissions();
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="space-y-6 lg:col-span-2">
+    <div className="grid gap-2 lg:grid-cols-3">
+      <div className="space-y-2 lg:col-span-2">
         <Card>
           <CardContent className="space-y-4">
             <h2 className="text-sm font-medium">Descripcion</h2>
@@ -34,7 +34,7 @@ export default function ProjectOverviewPage() {
         </Card>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-2">
         <Card>
           <CardContent className="space-y-3">
             <h2 className="text-sm font-medium">Datos</h2>

@@ -22,7 +22,7 @@ import {
   type Tone,
 } from "@/lib/labels";
 
-const PROJECT_ICONS: Record<ProjectStatus, LucideIcon> = {
+export const PROJECT_ICONS: Record<ProjectStatus, LucideIcon> = {
   [ProjectStatus.POR_INICIAR]: PauseCircle,
   [ProjectStatus.EN_DISENO]: Palette,
   [ProjectStatus.ESPERANDO_CLIENTE]: Clock,

@@ -129,7 +129,7 @@ function ClientRow({
   );
 
   return (
-    <TableRow className="group border-b border-border/70 hover:bg-[#ecf2f9]/50 transition-colors">
+    <TableRow className="group border-b border-border/70 hover:bg-muted/50 transition-colors">
       <TableCell className="w-14 font-mono text-xs text-muted-foreground/50 tabular-nums">
         ({String(index + 1).padStart(2, "0")})
       </TableCell>

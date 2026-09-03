@@ -3,6 +3,7 @@
 import { Toaster } from "sileo";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthBootstrap } from "@/features/auth/components/auth-bootstrap";
+import { ThemeProvider, useTheme } from "@/context/theme-provider";
 
 /**
  * Proveedores globales de la app.
@@ -13,12 +14,20 @@ import { AuthBootstrap } from "@/features/auth/components/auth-bootstrap";
  * no tendrian sesion.
  *
  */
+function ThemedToaster() {
+  const { resolvedTheme } = useTheme();
+  return <Toaster position="top-right" theme={resolvedTheme} />;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <TooltipProvider>
-      <AuthBootstrap />
-      {children}
-      <Toaster position="top-right" theme="light" />
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <AuthBootstrap />
+        {children}
+        <ThemedToaster />
+      </TooltipProvider>
+    </ThemeProvider>
   );
 }
+

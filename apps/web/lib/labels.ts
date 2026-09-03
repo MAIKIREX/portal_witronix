@@ -41,12 +41,12 @@ export const TONE_CLASSES: Record<Tone, string> = {
 
 /** Clases para el punto indicador luminoso de cada tono */
 export const TONE_DOT_CLASSES: Record<Tone, string> = {
-  neutral: "bg-slate-200 shadow-[0_0_8px_rgba(241,245,249,0.9)]",
-  info: "bg-cyan-100 shadow-[0_0_8px_rgba(207,250,254,0.95)]",
-  success: "bg-emerald-100 shadow-[0_0_8px_rgba(209,250,229,0.95)]",
-  warning: "bg-amber-100 shadow-[0_0_8px_rgba(254,243,199,0.95)]",
-  danger: "bg-red-100 shadow-[0_0_8px_rgba(254,202,202,0.95)]",
-  active: "bg-indigo-100 shadow-[0_0_8px_rgba(224,231,255,0.95)]",
+  neutral: "bg-slate-500 shadow-[0_0_6px_rgba(100,116,139,0.5)]",
+  info: "bg-sky-500 shadow-[0_0_6px_rgba(14,165,233,0.5)]",
+  success: "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]",
+  warning: "bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]",
+  danger: "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.5)]",
+  active: "bg-indigo-500 shadow-[0_0_6px_rgba(99,102,241,0.5)]",
 };
 
 export const ROLE_LABELS: Record<Role, string> = {

@@ -82,8 +82,13 @@ function RenderContent({
   // el tiempo y un modelo 3D en el espacio, ninguno tiene una superficie
   // plana estable donde fijar una coordenada 0-1.
   const isImage =
-    mediaKindFor(selected?.mimeType, selected?.originalName ?? view.data?.url) ===
-    "image";
+    mediaKindFor(selected?.mimeType, selected?.originalName) === "image";
+
+  // Verificamos que los datos devueltos por useRenderView coincidan con la
+  // version seleccionada para evitar condiciones de carrera (por ejemplo, pasar
+  // una URL de 3D a un <video> o <img> mientras se descarga la nueva URL firmada).
+  const isDataMatching =
+    Boolean(view.data && selected && view.data.version === selected.version);
 
   // Los comentarios se anclan a la VERSION concreta, no al render: cada
   // version tiene sus propias marcas y no se arrastran de una a otra.
@@ -129,7 +134,7 @@ function RenderContent({
 
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
         <div className="space-y-3">
-          {view.data ? (
+          {isDataMatching && view.data ? (
             isImage ? (
               // El marco lleva la proporcion EXACTA de la imagen para que las
               // anclas caigan en su sitio: con un contenedor de otra
