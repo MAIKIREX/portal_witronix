@@ -66,6 +66,16 @@ export interface FileDownload {
   expiresIn: number;
 }
 
+/** Respuesta de /files/:id/view o /files/:id/versions/:versionId/view: URL firmada inline. */
+export interface FileView {
+  url: string;
+  filename: string;
+  mimeType: string;
+  version: number;
+  sizeBytes: string;
+  expiresIn: number;
+}
+
 export interface CreateFileResult {
   file: ProjectFile;
   upload: UploadIntent;

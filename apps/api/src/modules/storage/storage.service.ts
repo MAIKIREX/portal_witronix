@@ -158,6 +158,27 @@ export class StorageService implements OnModuleInit {
   }
 
   /**
+   * URL temporal de previsualización (disposition inline).
+   * Permite que navegadores muestren PDFs, imágenes o textos en lugar de forzar descarga.
+   */
+  async createViewUrl(
+    storageKey: string,
+    filename?: string,
+    mimeType?: string,
+  ): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: storageKey,
+      ResponseContentDisposition: filename
+        ? `inline; filename="${this.sanitizeFilename(filename)}"`
+        : 'inline',
+      ...(mimeType ? { ResponseContentType: mimeType } : {}),
+    });
+
+    return getSignedUrl(this.presignClient, command, { expiresIn: this.downloadTtl });
+  }
+
+  /**
    * Lee los metadatos reales del objeto ya subido.
    * Se usa al confirmar una subida: el tamano y el tipo que declara el
    * cliente son una sugerencia, no un hecho.

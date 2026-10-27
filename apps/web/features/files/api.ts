@@ -9,6 +9,7 @@ import type {
   FileListItem,
   FileQuery,
   FileVersion,
+  FileView,
 } from "./types";
 
 /**
@@ -52,6 +53,26 @@ export const filesApi = {
   ): Promise<FileDownload> {
     return api
       .get<FileDownload>(`/files/${fileId}/versions/${versionId}/download`, {
+        signal,
+      })
+      .then((r) => r.data);
+  },
+
+  /** URL firmada inline para previsualizar la version actual. Caduca en 300 s. */
+  view(fileId: string, signal?: AbortSignal): Promise<FileView> {
+    return api
+      .get<FileView>(`/files/${fileId}/view`, { signal })
+      .then((r) => r.data);
+  },
+
+  /** URL firmada inline para previsualizar una version concreta. Caduca en 300 s. */
+  viewVersion(
+    fileId: string,
+    versionId: string,
+    signal?: AbortSignal,
+  ): Promise<FileView> {
+    return api
+      .get<FileView>(`/files/${fileId}/versions/${versionId}/view`, {
         signal,
       })
       .then((r) => r.data);

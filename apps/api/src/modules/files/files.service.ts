@@ -154,6 +154,48 @@ export class FilesService {
     };
   }
 
+  /**
+   * URL de previsualización temporal (disposition inline).
+   * Permite que el navegador abra el PDF o imagen embebida en lugar de forzar descarga.
+   */
+  async getViewUrl(fileId: string, versionId: string | undefined, user: AuthUser) {
+    const file = await this.prisma.projectFile.findFirst({
+      where: { id: fileId, deletedAt: null },
+      include: { currentVersion: true },
+    });
+
+    if (!file) {
+      throw new NotFoundException('El archivo solicitado no existe');
+    }
+    await this.access.assertMember(file.projectId, user);
+    this.assertVisible(file.isVisibleToClient, user);
+
+    const version = versionId
+      ? await this.prisma.fileVersion.findFirst({
+          where: { id: versionId, fileId, uploadStatus: UploadStatus.COMPLETED },
+        })
+      : file.currentVersion;
+
+    if (!version) {
+      throw new NotFoundException('La version solicitada no existe');
+    }
+
+    const url = await this.storage.createViewUrl(
+      version.storageKey,
+      version.originalName,
+      version.mimeType,
+    );
+
+    return {
+      url,
+      filename: version.originalName,
+      mimeType: version.mimeType,
+      version: version.version,
+      sizeBytes: version.sizeBytes.toString(),
+      expiresIn: 300,
+    };
+  }
+
   // --------------------- CICLO DE SUBIDA ---------------------
 
   /**

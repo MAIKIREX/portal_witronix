@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { FileCategory } from "@witronix/shared";
-import { Download, EyeOff, FileText, Layers } from "lucide-react";
+import { Download, Eye, EyeOff, FileText, Layers } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -30,6 +31,7 @@ import { filesApi } from "../api";
 import type { FileListItem } from "../types";
 import { UploadFileDialog } from "./upload-file-dialog";
 import { DownloadButton } from "./download-button";
+import { detectDocumentKind } from "./document-media";
 
 const CATEGORY_ITEMS = [
   { value: "", label: "Todas las categorias" },
@@ -133,27 +135,39 @@ export function FilesList({ projectId }: { projectId: string }) {
                       ({String(index + 1).padStart(2, "0")})
                     </TableCell>
                     <TableCell>
-                      <Link
-                        href={`/proyectos/${projectId}/archivos/${file.id}`}
-                        className="group-hover:text-primary block font-medium text-base text-foreground transition-colors"
-                      >
-                        {file.name}
-                      </Link>
-                      <span className="text-muted-foreground text-xs font-mono">
-                        {file.currentVersion?.originalName ?? "sin archivo"}
-                        {file._count.versions > 1 && (
-                          <span className="ml-2 inline-flex items-center gap-1 font-sans">
-                            <Layers className="size-3" />
-                            {file._count.versions}
+                      <div className="flex items-center gap-2">
+                        {file.currentVersion && (
+                          <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] font-semibold text-muted-foreground uppercase">
+                            {detectDocumentKind(
+                              file.currentVersion.mimeType,
+                              file.currentVersion.originalName,
+                            )}
                           </span>
                         )}
-                      </span>
-                      {!file.isVisibleToClient && (
-                        <span className="text-muted-foreground ml-2 inline-flex items-center gap-1 text-xs">
-                          <EyeOff className="size-3" />
-                          interno
+                        <Link
+                          href={`/proyectos/${projectId}/archivos/${file.id}`}
+                          className="group-hover:text-primary block font-medium text-base text-foreground transition-colors"
+                        >
+                          {file.name}
+                        </Link>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-muted-foreground text-xs font-mono">
+                          {file.currentVersion?.originalName ?? "sin archivo"}
+                          {file._count.versions > 1 && (
+                            <span className="ml-2 inline-flex items-center gap-1 font-sans">
+                              <Layers className="size-3" />
+                              {file._count.versions}
+                            </span>
+                          )}
                         </span>
-                      )}
+                        {!file.isVisibleToClient && (
+                          <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
+                            <EyeOff className="size-3" />
+                            interno
+                          </span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground hidden text-sm sm:table-cell font-normal">
                       {FILE_CATEGORY_LABELS[file.category]}
@@ -164,12 +178,27 @@ export function FilesList({ projectId }: { projectId: string }) {
                     <TableCell className="text-muted-foreground hidden text-sm lg:table-cell font-mono tabular-nums">
                       {formatDate(file.updatedAt)}
                     </TableCell>
-                    <TableCell>
-                      <DownloadButton
-                        fileId={file.id}
-                        disabled={!file.currentVersion}
-                        icon={<Download />}
-                      />
+                    <TableCell className="w-24 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          render={
+                            <Link
+                              href={`/proyectos/${projectId}/archivos/${file.id}`}
+                              title="Previsualizar documento"
+                            />
+                          }
+                          nativeButton={false}
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+                        <DownloadButton
+                          fileId={file.id}
+                          disabled={!file.currentVersion}
+                          icon={<Download />}
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

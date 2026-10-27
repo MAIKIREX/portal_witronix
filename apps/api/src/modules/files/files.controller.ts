@@ -130,6 +130,25 @@ export class FilesController {
     return this.files.getDownloadUrl(fileId, versionId, user);
   }
 
+  @Get(':fileId/view')
+  @ApiOperation({ summary: 'URL temporal para previsualizar la version actual' })
+  view(
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.files.getViewUrl(fileId, undefined, user);
+  }
+
+  @Get(':fileId/versions/:versionId/view')
+  @ApiOperation({ summary: 'URL temporal para previsualizar una version concreta' })
+  viewVersion(
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @Param('versionId', ParseUUIDPipe) versionId: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.files.getViewUrl(fileId, versionId, user);
+  }
+
   @Delete(':fileId')
   @Roles(Role.ADMIN, Role.PROJECT_MANAGER)
   @ApiOperation({
